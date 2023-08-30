@@ -12,6 +12,10 @@ from src.utils.schema import SCHEMA
 
 class Utils:
 
+    GUEST = {
+        'name': '$8Guest'
+    }
+
     @classmethod
     def createList(cls, elements):
         response = []

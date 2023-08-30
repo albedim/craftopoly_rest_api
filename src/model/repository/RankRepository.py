@@ -18,3 +18,8 @@ class RankRepository:
         ).params(userId=userId).first()
         return rank
 
+    @classmethod
+    def getRankById(cls, rankId):
+        rank = sql.session.query(Rank).filter(Rank.rank_id == rankId).first()
+        return rank
+
