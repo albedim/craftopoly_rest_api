@@ -5,6 +5,8 @@ import io
 import random
 import smtplib
 from email.message import EmailMessage
+
+import jwt
 from flask import jsonify
 from src.utils.Constants import Constants
 from src.utils.schema import SCHEMA
@@ -20,7 +22,7 @@ class Utils:
     def createList(cls, elements):
         response = []
         for element in elements:
-            response.append(element.toJson())
+            response.append(element.toJSON())
         return response
 
     @classmethod
@@ -121,6 +123,17 @@ class Utils:
         return finalArray
 
     @classmethod
+    def getTokenManually(cls, request):
+        token = request.headers.get("Authorization")
+        if token and token.startswith("Bearer "):
+            return token.split()[1]
+        return None
+
+    @classmethod
+    def decodeToken(cls, token):
+        return jwt.decode(token, 'super-secret', algorithms=["HS256"])
+
+    @classmethod
     def fixNumber(cls, number):
         if number < 999:
             return str(number)
@@ -139,3 +152,5 @@ class Utils:
         if number > 1000000000:
             return str(number)[0]+"MLD"
 
+
+print(Utils.hash("Albe"))

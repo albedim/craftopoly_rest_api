@@ -59,7 +59,9 @@ class UserService:
         if user is None:
             return Utils.createWrongResponse(False, Constants.NOT_FOUND, 404), 404
 
-        return Utils.createSuccessResponse(True, user.toJSON())
+        return Utils.createSuccessResponse(True, {
+            'token': create_access_token(user.toJSON(), expires_delta=timedelta(weeks=4))
+        })
 
     @classmethod
     def create(cls, body):
@@ -70,5 +72,5 @@ class UserService:
         if exists:
             return Utils.createWrongResponse(False, Constants.ALREADY_CREATED, 409), 409
 
-        user = UserRepository.create(body['username'], Utils.hash(body['password']))
+        user = UserRepository.create(body['uuid'], body['username'], Utils.hash(body['password']))
         return Utils.createSuccessResponse(True, user.toJSON())

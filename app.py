@@ -1,9 +1,10 @@
 from flask_jwt_extended import JWTManager
 
 from src.configuration.config import app, sql
-from src.controller import UserController, RankController
+from src.controller import UserController, RankController, TicketController
 
 # controllers init
+app.register_blueprint(TicketController.ticket)
 app.register_blueprint(RankController.rank)
 app.register_blueprint(UserController.user)
 

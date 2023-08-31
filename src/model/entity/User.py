@@ -8,11 +8,13 @@ class User(sql.Model):
     password: str = sql.Column(sql.String(40), nullable=False)
     username: str = sql.Column(sql.String(40), nullable=False)
     level: int = sql.Column(sql.Integer, nullable=False)
+    uuid: str = sql.Column(sql.String(140), nullable=False)
     created_on: datetime.date = sql.Column(sql.Date, nullable=True)
     rank_id: int = sql.Column(sql.Integer, nullable=False)
 
-    def __init__(self, username, password):
+    def __init__(self, uuid, username, password):
         self.username = username
+        self.uuid = uuid
         self.password = password
         self.rank_id = 5
         self.level = 0
@@ -22,6 +24,7 @@ class User(sql.Model):
         obj = {
             'user_id': self.user_id,
             'username': self.username,
+            'uuid': self.uuid,
             'level': self.level,
             'created_on': str(self.created_on),
             'rank_id': self.rank_id

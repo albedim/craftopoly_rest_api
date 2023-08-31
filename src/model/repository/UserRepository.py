@@ -18,9 +18,14 @@ class UserRepository:
         return user
 
     @classmethod
-    def create(cls, username, password):
-        user = User(username, password)
+    def create(cls, uuid, username, password):
+        user = User(uuid, username, password)
         sql.session.add(user)
         sql.session.commit()
+        return user
+
+    @classmethod
+    def getByUUID(cls, uuid):
+        user = sql.session.query(User).filter(User.uuid == uuid).first()
         return user
 
