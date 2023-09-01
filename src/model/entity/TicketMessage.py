@@ -2,19 +2,19 @@ import datetime
 from src.configuration.config import sql
 
 
-class Message(sql.Model):
-    __tablename__ = 'messages'
+class TicketMessage(sql.Model):
+    __tablename__ = 'ticket_messages'
     message_id: int = sql.Column(sql.Integer, primary_key=True)
     ticket_id: int = sql.Column(sql.Integer, nullable=False)
     user_id: int = sql.Column(sql.Integer, nullable=False)
     content: str = sql.Column(sql.String(240), nullable=False)
-    created_on: datetime.date = sql.Column(sql.Date, nullable=True)
+    created_on: datetime.datetime = sql.Column(sql.DateTime, nullable=True)
 
     def __init__(self, ticketId, userId, content):
-        self.ticketId = ticketId
-        self.userId = userId
+        self.ticket_id = ticketId
+        self.user_id = userId
         self.content = content
-        self.created_on = datetime.date.today()
+        self.created_on = datetime.datetime.now()
 
     def toJSON(self, **kvargs):
         obj = {

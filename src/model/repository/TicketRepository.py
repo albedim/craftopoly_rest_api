@@ -1,16 +1,26 @@
 from sqlalchemy import text, desc
 
 from src.configuration.config import sql
-from src.model.entity.Rank import Rank
 from src.model.entity.Ticket import Ticket
-from src.model.entity.User import User
 
 
 class TicketRepository:
 
     @classmethod
-    def getTicket(cls, ticketId) -> Rank:
-        ticket: Ticket = sql.session.query(Ticket).filter(Ticket.ticket_id == ticketId).first()
+    def getTicket(cls, ticketId):
+        ticket = sql.session.query(Ticket).filter(Ticket.ticket_id == ticketId).first()
+        return ticket
+
+    @classmethod
+    def create(cls, userId):
+        ticket = Ticket(userId)
+        sql.session.add(ticket)
+        sql.session.commit()
+        return ticket
+
+    @classmethod
+    def getOpenTicket(cls, userId):
+        ticket = sql.session.query(Ticket).filter(Ticket.owner_id == userId).filter(Ticket.open == True).first()
         return ticket
 
     @classmethod
@@ -26,7 +36,7 @@ class TicketRepository:
                  "JOIN users "
                  "ON users.user_id = tickets.owner_id "
                  "WHERE users.username = :username "
-                 "ORDER BY tickets.ticket_id DESC")
-        ).params(username=username).all()
+                 "ORDER BY tickets.ticket_id DESC").params(username=username)
+        ).all()
         return tickets
 

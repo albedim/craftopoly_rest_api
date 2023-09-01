@@ -151,6 +151,3 @@ class Utils:
             return str(number)[0:3]+"M"
         if number > 1000000000:
             return str(number)[0]+"MLD"
-
-
-print(Utils.hash("Albe"))

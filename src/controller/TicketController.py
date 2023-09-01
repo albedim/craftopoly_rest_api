@@ -1,7 +1,5 @@
 from flask import Blueprint, request
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_cors import cross_origin
-from src.service.RankService import RankService
 from src.service.TicketServic import TicketService
 from src.utils.Constants import Constants
 from src.utils.Utils import Utils
@@ -25,6 +23,17 @@ def getAll():
 @cross_origin()
 def getOfUser(username):
     return TicketService.getTickets(username)
+
+
+@ticket.route("/", methods=['POST'])
+@cross_origin()
+def create():
+    platform = request.args.get("platform")
+
+    if platform is None:
+        return Utils.createWrongResponse(False, Constants.INVALID_REQUEST, 400), 400
+
+    return TicketService.create(platform, Utils.getTokenManually(request), request.json)
 
 
 @ticket.route("/<ticketId>", methods=['GET'])
