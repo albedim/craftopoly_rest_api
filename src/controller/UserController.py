@@ -31,6 +31,12 @@ def create():
     return UserService.create(request.json)
 
 
+@user.route("/staffers", methods=['GET'])
+@cross_origin()
+def getStaffers():
+    return UserService.getStaffers()
+
+
 @user.route("/signin", methods=['POST'])
 @cross_origin()
 def signin():

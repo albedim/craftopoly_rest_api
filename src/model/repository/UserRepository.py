@@ -13,6 +13,17 @@ class UserRepository:
         return user
 
     @classmethod
+    def getStaffers(cls) -> User:
+        users = sql.session.query(User).from_statement(
+            text("SELECT users.* "
+                 "FROM users "
+                 "JOIN ranks "
+                 "ON ranks.rank_id = users.rank_id "
+                 "WHERE ranks.staffer = true")
+        ).all()
+        return users
+
+    @classmethod
     def signin(cls, username, password) -> User:
         user = sql.session.query(User).filter(User.username == username).filter(User.password == password).first()
         return user
@@ -27,5 +38,10 @@ class UserRepository:
     @classmethod
     def getByUUID(cls, uuid):
         user = sql.session.query(User).filter(User.uuid == uuid).first()
+        return user
+
+    @classmethod
+    def getByUserId(cls, userId):
+        user = sql.session.query(User).filter(User.user_id == userId).first()
         return user
 

@@ -16,13 +16,13 @@ def getAll():
     if platform is None:
         return Utils.createWrongResponse(False, Constants.INVALID_REQUEST, 400), 400
 
-    return TicketService.getAllTickets(platform, Utils.getTokenManually(request))
+    return TicketService.getAllTickets(int(request.args.get("page")), platform, Utils.getTokenManually(request))
 
 
 @ticket.route("/user/<username>", methods=['GET'])
 @cross_origin()
 def getOfUser(username):
-    return TicketService.getTickets(username)
+    return TicketService.getTickets(int(request.args.get("page")), username)
 
 
 @ticket.route("/", methods=['POST'])
@@ -45,4 +45,17 @@ def get(ticketId):
     if platform is None:
         return Utils.createWrongResponse(False, Constants.INVALID_REQUEST, 400), 400
 
-    return TicketService.getTicket(platform, ticketId, Utils.getTokenManually(request))
+    return TicketService.getTicket(int(request.args.get("page")), platform, ticketId, Utils.getTokenManually(request))
+
+
+@ticket.route("/<ticketId>", methods=['PUT'])
+@cross_origin()
+def close(ticketId):
+
+    platform = request.args.get("platform")
+
+    if platform is None:
+        return Utils.createWrongResponse(False, Constants.INVALID_REQUEST, 400), 400
+
+    return TicketService.closeTicket(platform, ticketId, Utils.getTokenManually(request))
+

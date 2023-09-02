@@ -15,22 +15,12 @@ class UserService:
         user = UserRepository.getByUsername(username)
         if user is None:
             rank = RankRepository.getRankById(5)
-            rank.name = rank.name\
-                .replace("{level}", "0")\
-                .replace("[", "SBO")\
-                .replace("]", "SBC")\
-                .replace(" ", "_")
             return Utils.createSuccessResponse(
                 True,
                 rank.toJSON()
             )
 
         rank = RankRepository.getRank(user.user_id)
-        rank.name = rank.name\
-            .replace("{level}", Utils.fixNumber(user.level))\
-            .replace("[", "SBO") \
-            .replace("]", "SBC") \
-            .replace(" ", "_")
         return Utils.createSuccessResponse(
             True,
             rank.toJSON()
@@ -48,6 +38,13 @@ class UserService:
         return Utils.createSuccessResponse(
             True,
             UserRepository.getByUsername(username).toJSON()
+        )
+
+    @classmethod
+    def getStaffers(cls):
+        return Utils.createSuccessResponse(
+            True,
+            Utils.createList(UserRepository.getStaffers())
         )
 
     @classmethod

@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy import text, desc
 
 from src.configuration.config import sql
@@ -25,7 +27,7 @@ class TicketRepository:
 
     @classmethod
     def getAllTickets(cls):
-        tickets = sql.session.query(Ticket).order_by(desc(Ticket.ticket_id)).all()
+        tickets = sql.session.query(Ticket).filter(Ticket.open == True).order_by(desc(Ticket.ticket_id)).all()
         return tickets
 
     @classmethod
@@ -39,4 +41,16 @@ class TicketRepository:
                  "ORDER BY tickets.ticket_id DESC").params(username=username)
         ).all()
         return tickets
+
+    @classmethod
+    def closeTicket(cls, ticket):
+        ticket.open = False
+        sql.session.commit()
+        return ticket
+
+    @classmethod
+    def addCloseDate(cls, ticket):
+        ticket.closed_on = datetime.datetime.now()
+        sql.session.commit()
+        return ticket
 

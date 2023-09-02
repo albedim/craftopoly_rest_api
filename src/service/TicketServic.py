@@ -10,7 +10,7 @@ from src.utils.Utils import Utils
 class TicketService:
 
     @classmethod
-    def getTicket(cls, platform, ticketId, token):
+    def getTicket(cls, page, platform, ticketId, token):
         ticket: Ticket = TicketRepository.getTicket(ticketId)
 
         if ticket is None:
@@ -20,6 +20,7 @@ class TicketService:
                 404
             ), 404
         else:
+            owner = UserRepository.getByUserId(ticket.owner_id)
             if platform == "mcserver":
                 user = UserRepository.getByUUID(token)
                 if user is None:
@@ -28,9 +29,18 @@ class TicketService:
                     rank = RankRepository.getRank(user.user_id)
                     if rank.staffer or user.user_id == ticket.owner_id:
                         messages = TicketMessageRepository.getMessages(ticketId)
+
+                        res = []
+                        counter = page * 10 - 10
+                        while counter < page * 10 and counter < len(messages):
+                            print(messages[counter].user_id)
+                            user = UserRepository.getByUserId(messages[counter].user_id).toJSON()
+                            res.append(messages[counter].toJSON(owner=user))
+                            counter += 1
+
                         return Utils.createSuccessResponse(
                             True,
-                            ticket.toJSON(messages=Utils.createListOfPages(Utils.createList(messages), 5))
+                            ticket.toJSON(owner=owner.toJSON(), messages=res)
                         )
                     else:
                         return Utils.createWrongResponse(False, Constants.NOT_ENOUGH_PERMISSIONS, 403), 403
@@ -39,26 +49,36 @@ class TicketService:
                 rank = RankRepository.getRank(user['user_id'])
                 if rank.staffer or user['user_id'] == ticket.owner_id:
                     messages = TicketMessageRepository.getMessages(ticketId)
+
+                    res = []
+                    counter = page * 10 - 10
+                    while counter < page * 10 and counter < len(messages):
+                        user = UserRepository.getByUserId(messages[counter].user_id).toJSON()
+                        res.append(messages[counter].toJSON(owner=user))
+                        counter += 1
+
                     return Utils.createSuccessResponse(
                         True,
-                        ticket.toJSON(messages=Utils.createListOfPages(Utils.createList(messages), 5))
+                        ticket.toJSON(owner=owner.toJSON(), messages=res)
                     )
                 else:
                     return Utils.createWrongResponse(False, Constants.NOT_ENOUGH_PERMISSIONS, 403), 403
 
     @classmethod
-    def getAllTickets(cls, platform, token):
-
+    def getAllTickets(cls, page, platform, token):
         if platform == 'website':
             user = Utils.decodeToken(token)['sub']
             rank = RankRepository.getRankById(user['rank_id'])
             if rank.staffer:
                 tickets = TicketRepository.getAllTickets()
                 res = []
-                for ticket in tickets:
-                    message = TicketMessageRepository.getMessages(ticket.ticket_id)[0].content
-                    res.append(ticket.toJSON(message=message))
-                return Utils.createSuccessResponse(True, Utils.createListOfPages(res, 8))
+                counter = page * 10 - 10
+                while counter < page * 10 and counter < len(tickets):
+                    message = TicketMessageRepository.getMessages(tickets[counter].ticket_id)[0].content
+                    user = UserRepository.getByUserId(tickets[counter].owner_id).toJSON()
+                    res.append(tickets[counter].toJSON(owner=user, message=message))
+                    counter += 1
+                return Utils.createSuccessResponse(True, res)
             else:
                 return Utils.createWrongResponse(False, Constants.NOT_ENOUGH_PERMISSIONS, 403), 403
         elif platform == 'mcserver':
@@ -71,23 +91,27 @@ class TicketService:
                 if rank.staffer:
                     tickets = TicketRepository.getAllTickets()
                     res = []
-                    for ticket in tickets:
-                        message = TicketMessageRepository.getMessages(ticket.ticket_id)[0].content
-                        res.append(ticket.toJSON(message=message))
-                    return Utils.createSuccessResponse(True, Utils.createListOfPages(res, 8))
+                    counter = page * 10 - 10
+                    while counter < page * 10 and counter < len(tickets):
+                        message = TicketMessageRepository.getMessages(tickets[counter].ticket_id)[0].content
+                        user = UserRepository.getByUserId(tickets[counter].owner_id).toJSON()
+                        res.append(tickets[counter].toJSON(owner=user, message=message))
+                        counter += 1
+                    return Utils.createSuccessResponse(True, res)
                 else:
                     return Utils.createWrongResponse(False, Constants.NOT_ENOUGH_PERMISSIONS, 403), 403
 
     @classmethod
-    def getTickets(cls, username):
+    def getTickets(cls, page, username):
         tickets = TicketRepository.getTickets(username)
         res = []
+        counter = page * 10 - 10
+        while counter < page * 10 and counter < len(tickets):
+            message = TicketMessageRepository.getMessages(tickets[counter].ticket_id)[0].content
+            res.append(tickets[counter].toJSON(message=message))
+            counter += 1
 
-        for ticket in tickets:
-            message = TicketMessageRepository.getMessages(ticket.ticket_id)[0].content
-            res.append(ticket.toJSON(message=message))
-
-        return Utils.createSuccessResponse(True, Utils.createListOfPages(res, 8))
+        return Utils.createSuccessResponse(True, res)
 
     @classmethod
     def hasTicketOpen(cls, userId):
@@ -103,7 +127,7 @@ class TicketService:
                 return Utils.createWrongResponse(False, Constants.ALREADY_CREATED, 409), 409
             ticket = TicketRepository.create(user.user_id)
             message = TicketMessageRepository.create(ticket.ticket_id, user.user_id, request['message'])
-            return cls.getTickets(user.username)
+            return cls.getTickets(1, user.username)
         elif platform == 'website':
             user = Utils.decodeToken(token)['sub']
             if user is None:
@@ -112,4 +136,49 @@ class TicketService:
                 return Utils.createWrongResponse(False, Constants.ALREADY_CREATED, 409), 409
             ticket = TicketRepository.create(user['user_id'])
             message = TicketMessageRepository.create(ticket.ticket_id, user['user_id'], request['message'])
-            return cls.getTickets(user['username'])
+            return cls.getTickets(1, user['username'])
+
+    @classmethod
+    def closeTicket(cls, platform, ticketId, token):
+        ticket = TicketRepository.getTicket(ticketId)
+
+        if ticket is None:
+            return Utils.createWrongResponse(
+                False,
+                Constants.NOT_FOUND,
+                404
+            ), 404
+
+        if not ticket.open:
+            return Utils.createWrongResponse(
+                False,
+                Constants.ALREADY_CREATED,
+                409
+            ), 409
+
+        if platform == 'website':
+            user = Utils.decodeToken(token)['sub']
+            rank = RankRepository.getRankById(user['rank_id'])
+            if rank.staffer or user['user_id'] == ticket.owner_id:
+                TicketRepository.closeTicket(ticket)
+                TicketRepository.addCloseDate(ticket)
+                return Utils.createSuccessResponse(True, Constants.CREATED)
+            else:
+                return Utils.createWrongResponse(
+                    False,
+                    Constants.NOT_ENOUGH_PERMISSIONS,
+                    403
+                ), 403
+        elif platform == 'mcserver':
+            user = UserRepository.getByUUID(token)
+            rank = RankRepository.getRankById(user.rank_id)
+            if rank.staffer or user.user_id == ticket.owner_id:
+                TicketRepository.closeTicket(ticket)
+                TicketRepository.addCloseDate(ticket)
+                return Utils.createSuccessResponse(True, Constants.CREATED)
+            else:
+                return Utils.createWrongResponse(
+                    False,
+                    Constants.NOT_ENOUGH_PERMISSIONS,
+                    403
+                ), 403
