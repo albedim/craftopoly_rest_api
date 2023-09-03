@@ -20,6 +20,12 @@ class Constants:
     ALREADY_CREATED = "This resource was already created"
     INVALID_REQUEST: str = "Invalid request"
 
+    COMMANDS = {
+        "move": 3,
+        "vanish": 3,
+        "mute": 4,
+    }
+
     EMAIL = ''
     PASSWORD = ''
     PASSWORD_FORGOTTEN_EMAIL: str = "Hey! \nHere's the link to recover your account: https://cryllet-fe.pages.dev/create_password/{token}"

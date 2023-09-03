@@ -152,3 +152,16 @@ class Utils:
         if number > 1000000000:
             return str(number)[0]+"MLD"
 
+    @classmethod
+    def minuteConverter(cls, time):
+        numberTime = int(time[:-1])
+        if "s" in time:
+            return numberTime / 60
+        if "m" in time:
+            return numberTime
+        if "h" in time:
+            return numberTime * 60
+        if "d" in time:
+            return 60 * (24 * numberTime)
+        return None
+

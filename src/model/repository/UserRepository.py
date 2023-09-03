@@ -50,4 +50,3 @@ class UserRepository:
         user.rank_id = rankId
         sql.session.commit()
         return user
-

@@ -1,3 +1,4 @@
+import datetime
 from datetime import timedelta
 from typing import Any
 from flask_jwt_extended import create_access_token
@@ -16,16 +17,39 @@ class UserService:
         user = UserRepository.getByUsername(username)
         if user is None:
             rank = RankRepository.getRankById(5)
+            rank.name = rank.name.replace("{level}", "0")
             return Utils.createSuccessResponse(
                 True,
                 rank.toJSON()
             )
 
         rank = RankRepository.getRank(user.user_id)
+        rank.name = rank.name.replace("{level}", str(user.level))
         return Utils.createSuccessResponse(
             True,
             rank.toJSON()
         )
+
+    @classmethod
+    def canCommand(cls, command, uuid):
+        user = UserRepository.getByUUID(uuid)
+        if user is None:
+            return Utils.createWrongResponse(
+                False,
+                Constants.NOT_FOUND,
+                404
+            ), 404
+
+        rank = RankRepository.getRankById(user.rank_id)
+        if command in cls.commands:
+            return Utils.createSuccessResponse(
+                True,
+                rank.rank_id <= cls.commands[command]
+            )
+        return Utils.createSuccessResponse(
+                True,
+                False
+            )
 
     @classmethod
     def exists(cls, username):
@@ -47,6 +71,29 @@ class UserService:
             True,
             Utils.createList(UserRepository.getStaffers())
         )
+
+    @classmethod
+    def getStafferChat(cls, uuid):
+        user = UserRepository.getByUUID(uuid)
+        if user is None:
+            return Utils.createWrongResponse(
+                False,
+                Constants.NOT_ENOUGH_PERMISSIONS,
+                403
+            ), 403
+        else:
+            rank = RankRepository.getRankById(user.rank_id)
+            if not rank.staffer:
+                return Utils.createWrongResponse(
+                    False,
+                    Constants.NOT_ENOUGH_PERMISSIONS,
+                    403
+                ), 403
+            else:
+                return Utils.createSuccessResponse(
+                    True,
+                    Utils.createList(UserRepository.getStaffers())
+                )
 
     @classmethod
     def signin(cls, body):

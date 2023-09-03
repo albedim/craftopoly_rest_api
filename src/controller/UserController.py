@@ -37,10 +37,22 @@ def getStaffers():
     return UserService.getStaffers()
 
 
+@user.route("/staffers/chat", methods=['GET'])
+@cross_origin()
+def getStaffersChat():
+    return UserService.getStafferChat(Utils.getTokenManually(request))
+
+
 @user.route("/signin", methods=['POST'])
 @cross_origin()
 def signin():
     return UserService.signin(request.json)
+
+
+@user.route("/staffers/command/<command>", methods=['GET'])
+@cross_origin()
+def canCommand(command):
+    return UserService.canCommand(command, Utils.getTokenManually(request))
 
 
 @user.route("/rank/upgrade", methods=['PUT'])
