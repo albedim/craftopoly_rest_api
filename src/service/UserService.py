@@ -4,6 +4,7 @@ from flask_jwt_extended import create_access_token
 from src.model.entity.User import User
 from src.model.repository.RankRepository import RankRepository
 from src.model.repository.UserRepository import UserRepository
+from src.service.RankService import RankService
 from src.utils.Constants import Constants
 from src.utils.Utils import Utils
 
@@ -71,3 +72,123 @@ class UserService:
 
         user = UserRepository.create(body['uuid'], body['username'], Utils.hash(body['password']))
         return Utils.createSuccessResponse(True, user.toJSON())
+
+    @classmethod
+    def upgradeRank(cls, uuid, request):
+        user = UserRepository.getByUUID(uuid)
+        if user is None:
+            return Utils.createWrongResponse(
+                False,
+                Constants.NOT_FOUND,
+                404
+            ), 404
+        else:
+            if user.rank_id == 1 or user.rank_id == 2:
+                target = UserRepository.getByUsername(request['username'])
+                if target is None:
+                    return Utils.createWrongResponse(
+                        False,
+                        Constants.NOT_FOUND,
+                        404
+                    ), 404
+                else:
+                    if user.rank_id == 2:
+                        if target.user_id != user.user_id:
+                            if target.rank_id > 2:
+                                UserRepository.editRank(target, RankService.getUpgradeRank(target))
+                                return Utils.createSuccessResponse(
+                                    True,
+                                    RankRepository.getRankById(target.rank_id).name
+                                )
+                            else:
+                                return Utils.createWrongResponse(
+                                    False,
+                                    Constants.NOT_ENOUGH_PERMISSIONS + " [auto-upgrade is disabled] ",
+                                    403
+                                ), 403
+                        else:
+                            return Utils.createWrongResponse(
+                                False,
+                                Constants.NOT_ENOUGH_PERMISSIONS + " [auto-upgrade is disabled] ",
+                                403
+                            ), 403
+                    else:
+                        if target.rank_id > 1:
+                            UserRepository.editRank(target, RankService.getUpgradeRank(target))
+                            return Utils.createSuccessResponse(
+                                True,
+                                RankRepository.getRankById(target.rank_id).name
+                            )
+                        else:
+                            return Utils.createWrongResponse(
+                                False,
+                                Constants.NOT_ENOUGH_PERMISSIONS + " [auto-upgrade is disabled] ",
+                                403
+                            ), 403
+            else:
+                return Utils.createWrongResponse(
+                    False,
+                    Constants.NOT_ENOUGH_PERMISSIONS,
+                    403
+                ), 403
+
+    @classmethod
+    def downgradeRank(cls, uuid, request):
+        user = UserRepository.getByUUID(uuid)
+        if user is None:
+            return Utils.createWrongResponse(
+                False,
+                Constants.NOT_FOUND,
+                404
+            ), 404
+        else:
+            if user.rank_id == 1 or user.rank_id == 2:
+                target = UserRepository.getByUsername(request['username'])
+                if target is None:
+                    return Utils.createWrongResponse(
+                        False,
+                        Constants.NOT_FOUND,
+                        404
+                    ), 404
+                else:
+                    if user.rank_id == 2:
+                        if target.user_id != user.user_id:
+                            print(target.rank_id)
+                            if target.rank_id > 1 and target.rank_id < 5:
+                                UserRepository.editRank(target, RankService.getDowngradeRank(target))
+                                return Utils.createSuccessResponse(
+                                    True,
+                                    RankRepository.getRankById(target.rank_id).name
+                                )
+                            else:
+                                return Utils.createWrongResponse(
+                                    False,
+                                    Constants.NOT_ENOUGH_PERMISSIONS + " [auto-upgrade is disabled] ",
+                                    403
+                                ), 403
+                        else:
+                            return Utils.createWrongResponse(
+                                False,
+                                Constants.NOT_ENOUGH_PERMISSIONS + " [auto-upgrade is disabled] ",
+                                403
+                            ), 403
+                    else:
+                        if target.rank_id >= 1 and target.rank_id < 5:
+                            print(target.rank_id)
+                            UserRepository.editRank(target, RankService.getDowngradeRank(target))
+                            return Utils.createSuccessResponse(
+                                True,
+                                RankRepository.getRankById(target.rank_id).name
+                            )
+                        else:
+                            return Utils.createWrongResponse(
+                                False,
+                                Constants.NOT_ENOUGH_PERMISSIONS + " [auto-upgrade is disabled] ",
+                                403
+                            ), 403
+            else:
+                return Utils.createWrongResponse(
+                    False,
+                    Constants.NOT_ENOUGH_PERMISSIONS,
+                    403
+                ), 403

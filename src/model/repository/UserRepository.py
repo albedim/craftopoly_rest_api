@@ -45,3 +45,9 @@ class UserRepository:
         user = sql.session.query(User).filter(User.user_id == userId).first()
         return user
 
+    @classmethod
+    def editRank(cls, user, rankId):
+        user.rank_id = rankId
+        sql.session.commit()
+        return user
+

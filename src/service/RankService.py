@@ -10,4 +10,11 @@ from src.utils.Utils import Utils
 
 class RankService:
 
-    ...
+    @classmethod
+    def getDowngradeRank(cls, user):
+        return RankRepository.getRankById(user.rank_id + 1).rank_id
+
+    @classmethod
+    def getUpgradeRank(cls, user):
+        return RankRepository.getRankById(user.rank_id - 1).rank_id
+

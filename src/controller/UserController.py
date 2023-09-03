@@ -41,3 +41,15 @@ def getStaffers():
 @cross_origin()
 def signin():
     return UserService.signin(request.json)
+
+
+@user.route("/rank/upgrade", methods=['PUT'])
+@cross_origin()
+def upgradeRank():
+    return UserService.upgradeRank(Utils.getTokenManually(request), request.json)
+
+
+@user.route("/rank/downgrade", methods=['PUT'])
+@cross_origin()
+def downgradeRank():
+    return UserService.downgradeRank(Utils.getTokenManually(request), request.json)

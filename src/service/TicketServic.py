@@ -74,9 +74,14 @@ class TicketService:
                 res = []
                 counter = page * 10 - 10
                 while counter < page * 10 and counter < len(tickets):
-                    message = TicketMessageRepository.getMessages(tickets[counter].ticket_id)[0].content
-                    user = UserRepository.getByUserId(tickets[counter].owner_id).toJSON()
-                    res.append(tickets[counter].toJSON(owner=user, message=message))
+                    message = TicketMessageRepository.getMessages(tickets[counter].ticket_id)[-1]
+                    messageOwner = UserRepository.getByUserId(message.user_id)
+                    ticketOwner = UserRepository.getByUserId(tickets[counter].owner_id).toJSON()
+                    res.append(tickets[counter].toJSON(
+                        message_owner=messageOwner.username,
+                        owner=ticketOwner,
+                        message=message.content
+                    ))
                     counter += 1
                 return Utils.createSuccessResponse(True, res)
             else:
@@ -93,9 +98,14 @@ class TicketService:
                     res = []
                     counter = page * 10 - 10
                     while counter < page * 10 and counter < len(tickets):
-                        message = TicketMessageRepository.getMessages(tickets[counter].ticket_id)[0].content
-                        user = UserRepository.getByUserId(tickets[counter].owner_id).toJSON()
-                        res.append(tickets[counter].toJSON(owner=user, message=message))
+                        message = TicketMessageRepository.getMessages(tickets[counter].ticket_id)[-1]
+                        messageOwner = UserRepository.getByUserId(message.user_id)
+                        ticketOwner = UserRepository.getByUserId(tickets[counter].owner_id).toJSON()
+                        res.append(tickets[counter].toJSON(
+                            message_owner=messageOwner.username,
+                            owner=ticketOwner,
+                            message=message.content
+                        ))
                         counter += 1
                     return Utils.createSuccessResponse(True, res)
                 else:
@@ -107,8 +117,14 @@ class TicketService:
         res = []
         counter = page * 10 - 10
         while counter < page * 10 and counter < len(tickets):
-            message = TicketMessageRepository.getMessages(tickets[counter].ticket_id)[0].content
-            res.append(tickets[counter].toJSON(message=message))
+            message = TicketMessageRepository.getMessages(tickets[counter].ticket_id)[-1]
+            messageOwner = UserRepository.getByUserId(message.user_id)
+            ticketOwner = UserRepository.getByUserId(tickets[counter].owner_id).toJSON()
+            res.append(tickets[counter].toJSON(
+                message_owner=messageOwner.username,
+                owner=ticketOwner,
+                message=message.content
+            ))
             counter += 1
 
         return Utils.createSuccessResponse(True, res)
