@@ -31,10 +31,14 @@ class BanService:
                         createdBan = BanRepository.create(target.user_id, request['reason'], user.user_id)
                         return Utils.createSuccessResponse(
                             True,
-                            createdBan.toJSON(banned_by=user.toJSON())
+                            createdBan.toJSON(
+                                ends_on="perma",
+                                banned_by=user.toJSON()
+                            )
                         )
                     else:
                         minutes = Utils.minuteBanConverter(request['time'])
+                        print(minutes)
                         if minutes is None:
                             return Utils.createWrongResponse(
                                 False,
@@ -46,7 +50,9 @@ class BanService:
                             createdBan = BanRepository.create(target.user_id, request['reason'], user.user_id, finalDateTime)
                             return Utils.createSuccessResponse(
                                 True,
-                                createdBan.toJSON(banned_by=user.toJSON())
+                                createdBan.toJSON(
+                                    banned_by=user.toJSON()
+                                )
                             )
                 else:
                     return Utils.createWrongResponse(
@@ -76,7 +82,7 @@ class BanService:
             return Utils.createSuccessResponse(
                 True,
                 currentBan.toJSON(
-                    ends_on="perma" if currentBan.ends_on is None else currentBan.ends_on,
+                    ends_on="perma" if currentBan.ends_on is None else str(currentBan.ends_on),
                     banned_by=banOwner.toJSON()
                 )
             )
@@ -86,3 +92,37 @@ class BanService:
                 Constants.NOT_FOUND,
                 404
             ), 404
+
+    @classmethod
+    def removeBan(cls, uuid, username):
+        user = UserRepository.getByUUID(uuid)
+        target = UserRepository.getByUsername(username)
+        if user is None or target is None:
+            return Utils.createWrongResponse(
+                False,
+                Constants.NOT_ENOUGH_PERMISSIONS,
+                404
+            ), 404
+        else:
+            rank = RankRepository.getRankById(user.rank_id)
+            if rank.staffer:
+                currentBan = BanRepository.getCurrentBan(target.user_id)
+                if currentBan is not None:
+                    BanRepository.removeBan(currentBan)
+                    return Utils.createSuccessResponse(
+                        True,
+                        Constants.CREATED
+                    )
+                else:
+                    return Utils.createWrongResponse(
+                        False,
+                        Constants.NOT_ENOUGH_PERMISSIONS,
+                        404
+                    ), 404
+            else:
+                return Utils.createWrongResponse(
+                    False,
+                    Constants.NOT_ENOUGH_PERMISSIONS,
+                    403
+                ), 403
+

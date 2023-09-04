@@ -13,6 +13,12 @@ class TicketService:
     def getTicket(cls, page, platform, ticketId, token):
         ticket: Ticket = TicketRepository.getTicket(ticketId)
 
+        if not page.isnumeric():
+            return Utils.createWrongResponse(
+                False,
+                Constants.NOT_FOUND,
+                400
+            ), 400
         if ticket is None:
             return Utils.createWrongResponse(
                 False,
@@ -66,6 +72,14 @@ class TicketService:
 
     @classmethod
     def getAllTickets(cls, page, platform, token):
+
+        if not page.isnumeric():
+            return Utils.createWrongResponse(
+                False,
+                Constants.NOT_FOUND,
+                400
+            ), 400
+
         if platform == 'website':
             user = Utils.decodeToken(token)['sub']
             rank = RankRepository.getRankById(user['rank_id'])
@@ -113,6 +127,14 @@ class TicketService:
 
     @classmethod
     def getTickets(cls, page, username):
+
+        if not page.isnumeric():
+            return Utils.createWrongResponse(
+                False,
+                Constants.NOT_FOUND,
+                400
+            ), 400
+
         tickets = TicketRepository.getTickets(username)
         res = []
         counter = page * 10 - 10

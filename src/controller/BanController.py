@@ -20,3 +20,9 @@ def banUser():
 @cross_origin()
 def getBan(username):
     return BanService.getBan(username)
+
+
+@ban.route("/user/<username>", methods=['PUT'])
+@cross_origin()
+def removeBan(username):
+    return BanService.removeBan(Utils.getTokenManually(request), username)

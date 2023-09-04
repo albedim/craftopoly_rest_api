@@ -154,28 +154,34 @@ class Utils:
 
     @classmethod
     def minuteMuteConverter(cls, time):
-        numberTime = int(time[:-1])
-        if "s" in time:
-            return numberTime / 60
-        if "m" in time:
-            return numberTime
-        if "h" in time:
-            return numberTime * 60
-        if "d" in time:
-            return 60 * 24 * numberTime
-        return None
+        try:
+            numberTime = int(time[:-1])
+            if "s" in time:
+                return numberTime / 60
+            if "m" in time:
+                return numberTime
+            if "h" in time:
+                return numberTime * 60
+            if "d" in time:
+                return 60 * 24 * numberTime
+            return None
+        except ValueError:
+            return None
 
     @classmethod
     def minuteBanConverter(cls, time):
-        numberTime = int(time[:-1])
-        if "h" in time:
-            return numberTime * 60
-        if "d" in time:
-            return 60 * 24 * numberTime
-        if "m" in time:
-            return 60 * 30 * 24 * numberTime
-        if "y" in time:
-            return 365 * 60 * 24 * numberTime
-        return None
+        try:
+            numberTime = int(time[:-1])
+            if "h" in time:
+                return numberTime * 60
+            if "d" in time:
+                return 60 * 24 * numberTime
+            if "m" in time:
+                return 60 * 30 * 24 * numberTime
+            if "y" in time:
+                return 365 * 60 * 24 * numberTime
+            return None
+        except ValueError:
+            return None
 
 
