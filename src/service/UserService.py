@@ -41,10 +41,10 @@ class UserService:
             ), 404
 
         rank = RankRepository.getRankById(user.rank_id)
-        if command in cls.commands:
+        if command in Constants.COMMANDS:
             return Utils.createSuccessResponse(
                 True,
-                rank.rank_id <= cls.commands[command]
+                rank.rank_id <= Constants.COMMANDS[command]
             )
         return Utils.createSuccessResponse(
                 True,

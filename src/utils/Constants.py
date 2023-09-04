@@ -21,9 +21,8 @@ class Constants:
     INVALID_REQUEST: str = "Invalid request"
 
     COMMANDS = {
-        "move": 3,
+        "teleport": 3,
         "vanish": 3,
-        "mute": 4,
     }
 
     EMAIL = ''

@@ -26,13 +26,20 @@ class MuteService:
             if rank.staffer:
                 mute = MuteRepository.getCurrentMute(target.user_id)
                 if mute is None:
-                    minutes = Utils.minuteConverter(request['time'])
-                    finalDateTime = datetime.now() + timedelta(minutes=minutes)
-                    createdMute = MuteRepository.create(target.user_id, request['reason'], user.user_id, finalDateTime)
-                    return Utils.createSuccessResponse(
-                        True,
-                        createdMute.toJSON()
-                    )
+                    minutes = Utils.minuteMuteConverter(request['time'])
+                    if minutes is None:
+                        return Utils.createWrongResponse(
+                            False,
+                            Constants.ALREADY_CREATED,
+                            400
+                        ), 400
+                    else:
+                        finalDateTime = datetime.now() + timedelta(minutes=minutes)
+                        createdMute = MuteRepository.create(target.user_id, request['reason'], user.user_id, finalDateTime)
+                        return Utils.createSuccessResponse(
+                            True,
+                            createdMute.toJSON()
+                        )
                 else:
                     return Utils.createWrongResponse(
                         False,
