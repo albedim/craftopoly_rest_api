@@ -31,6 +31,28 @@ class UserService:
         )
 
     @classmethod
+    def sync(cls, uuid, request):
+        user = UserRepository.getByUUID(uuid)
+        if user is not None:
+            if user.username != request['username']:
+                UserRepository.changeUsername(user, request['username'])
+                return Utils.createSuccessResponse(
+                    True,
+                    Constants.CREATED
+                )
+            else:
+                return Utils.createSuccessResponse(
+                    True,
+                    Constants.CREATED
+                )
+        else:
+            return Utils.createWrongResponse(
+                False,
+                Constants.NOT_FOUND,
+                404
+            ), 404
+
+    @classmethod
     def canCommand(cls, command, uuid):
         user = UserRepository.getByUUID(uuid)
         if user is None:
@@ -199,24 +221,17 @@ class UserService:
                     ), 404
                 else:
                     if user.rank_id == 2:
-                        if target.user_id != user.user_id:
-                            print(target.rank_id)
-                            if target.rank_id > 1 and target.rank_id < 5:
-                                UserRepository.editRank(target, RankService.getDowngradeRank(target))
-                                return Utils.createSuccessResponse(
-                                    True,
-                                    RankRepository.getRankById(target.rank_id).name
-                                )
-                            else:
-                                return Utils.createWrongResponse(
-                                    False,
-                                    Constants.NOT_ENOUGH_PERMISSIONS + " [auto-upgrade is disabled] ",
-                                    403
-                                ), 403
+                        print(target.rank_id)
+                        if target.rank_id > 1 and target.rank_id < 5:
+                            UserRepository.editRank(target, RankService.getDowngradeRank(target))
+                            return Utils.createSuccessResponse(
+                                True,
+                                RankRepository.getRankById(target.rank_id).name
+                            )
                         else:
                             return Utils.createWrongResponse(
                                 False,
-                                Constants.NOT_ENOUGH_PERMISSIONS + " [auto-upgrade is disabled] ",
+                                Constants.NOT_ENOUGH_PERMISSIONS + " [auto-upgradedsfdsggsd is disabled] ",
                                 403
                             ), 403
                     else:

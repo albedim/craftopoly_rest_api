@@ -23,43 +23,50 @@ class BanService:
                 404
             ), 404
         else:
-            rank = RankRepository.getRankById(user.rank_id)
-            if rank.staffer:
-                ban = BanRepository.getCurrentBan(target.user_id)
-                if ban is None:
-                    if request['time'] == 'perma':
-                        createdBan = BanRepository.create(target.user_id, request['reason'], user.user_id)
-                        return Utils.createSuccessResponse(
-                            True,
-                            createdBan.toJSON(
-                                ends_on="perma",
-                                banned_by=user.toJSON()
-                            )
-                        )
-                    else:
-                        minutes = Utils.minuteBanConverter(request['time'])
-                        print(minutes)
-                        if minutes is None:
-                            return Utils.createWrongResponse(
-                                False,
-                                Constants.ALREADY_CREATED,
-                                400
-                            ), 400
-                        else:
-                            finalDateTime = datetime.now() + timedelta(minutes=minutes)
-                            createdBan = BanRepository.create(target.user_id, request['reason'], user.user_id, finalDateTime)
+            userRank = RankRepository.getRankById(user.rank_id)
+            if userRank.staffer:
+                targetRank = RankRepository.getRankById(target.rank_id)
+                if targetRank.rank_id != Constants.ADMIN_RANK_ID:
+                    ban = BanRepository.getCurrentBan(target.user_id)
+                    if ban is None:
+                        if request['time'] == 'perma':
+                            createdBan = BanRepository.create(target.user_id, request['reason'], user.user_id)
                             return Utils.createSuccessResponse(
                                 True,
                                 createdBan.toJSON(
+                                    ends_on="perma",
                                     banned_by=user.toJSON()
                                 )
                             )
+                        else:
+                            minutes = Utils.minuteBanConverter(request['time'])
+                            if minutes is None:
+                                return Utils.createWrongResponse(
+                                    False,
+                                    Constants.ALREADY_CREATED,
+                                    400
+                                ), 400
+                            else:
+                                finalDateTime = datetime.now() + timedelta(minutes=minutes)
+                                createdBan = BanRepository.create(target.user_id, request['reason'], user.user_id, finalDateTime)
+                                return Utils.createSuccessResponse(
+                                    True,
+                                    createdBan.toJSON(
+                                        banned_by=user.toJSON()
+                                    )
+                                )
+                    else:
+                        return Utils.createWrongResponse(
+                            False,
+                            Constants.ALREADY_CREATED,
+                            409
+                        ), 409
                 else:
                     return Utils.createWrongResponse(
                         False,
-                        Constants.ALREADY_CREATED,
-                        409
-                    ), 409
+                        Constants.NOT_ENOUGH_PERMISSIONS,
+                        403
+                    ), 403
             else:
                 return Utils.createWrongResponse(
                     False,

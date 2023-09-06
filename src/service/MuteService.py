@@ -22,30 +22,38 @@ class MuteService:
                 404
             ), 404
         else:
-            rank = RankRepository.getRankById(user.rank_id)
-            if rank.staffer:
-                mute = MuteRepository.getCurrentMute(target.user_id)
-                if mute is None:
-                    minutes = Utils.minuteMuteConverter(request['time'])
-                    if minutes is None:
+            userRank = RankRepository.getRankById(user.rank_id)
+            if userRank.staffer:
+                targetRank = RankRepository.getRankById(target.rank_id)
+                if targetRank.rank_id != Constants.ADMIN_RANK_ID:
+                    mute = MuteRepository.getCurrentMute(target.user_id)
+                    if mute is None:
+                        minutes = Utils.minuteMuteConverter(request['time'])
+                        if minutes is None:
+                            return Utils.createWrongResponse(
+                                False,
+                                Constants.ALREADY_CREATED,
+                                400
+                            ), 400
+                        else:
+                            finalDateTime = datetime.now() + timedelta(minutes=minutes)
+                            createdMute = MuteRepository.create(target.user_id, request['reason'], user.user_id, finalDateTime)
+                            return Utils.createSuccessResponse(
+                                True,
+                                createdMute.toJSON()
+                            )
+                    else:
                         return Utils.createWrongResponse(
                             False,
                             Constants.ALREADY_CREATED,
-                            400
-                        ), 400
-                    else:
-                        finalDateTime = datetime.now() + timedelta(minutes=minutes)
-                        createdMute = MuteRepository.create(target.user_id, request['reason'], user.user_id, finalDateTime)
-                        return Utils.createSuccessResponse(
-                            True,
-                            createdMute.toJSON()
-                        )
+                            409
+                        ), 409
                 else:
                     return Utils.createWrongResponse(
                         False,
-                        Constants.ALREADY_CREATED,
-                        409
-                    ), 409
+                        Constants.NOT_ENOUGH_PERMISSIONS,
+                        403
+                    ), 403
             else:
                 return Utils.createWrongResponse(
                     False,

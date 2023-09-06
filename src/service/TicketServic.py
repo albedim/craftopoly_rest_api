@@ -19,6 +19,9 @@ class TicketService:
                 Constants.NOT_FOUND,
                 400
             ), 400
+        else:
+            page = int(page)
+
         if ticket is None:
             return Utils.createWrongResponse(
                 False,
@@ -79,6 +82,8 @@ class TicketService:
                 Constants.NOT_FOUND,
                 400
             ), 400
+        else:
+            page = int(page)
 
         if platform == 'website':
             user = Utils.decodeToken(token)['sub']
@@ -134,6 +139,8 @@ class TicketService:
                 Constants.NOT_FOUND,
                 400
             ), 400
+        else:
+            page = int(page)
 
         tickets = TicketRepository.getTickets(username)
         res = []
@@ -165,7 +172,7 @@ class TicketService:
                 return Utils.createWrongResponse(False, Constants.ALREADY_CREATED, 409), 409
             ticket = TicketRepository.create(user.user_id)
             message = TicketMessageRepository.create(ticket.ticket_id, user.user_id, request['message'])
-            return cls.getTickets(1, user.username)
+            return cls.getTickets("1", user.username)
         elif platform == 'website':
             user = Utils.decodeToken(token)['sub']
             if user is None:
@@ -174,7 +181,7 @@ class TicketService:
                 return Utils.createWrongResponse(False, Constants.ALREADY_CREATED, 409), 409
             ticket = TicketRepository.create(user['user_id'])
             message = TicketMessageRepository.create(ticket.ticket_id, user['user_id'], request['message'])
-            return cls.getTickets(1, user['username'])
+            return cls.getTickets("1", user['username'])
 
     @classmethod
     def closeTicket(cls, platform, ticketId, token):

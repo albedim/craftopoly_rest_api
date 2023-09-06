@@ -25,6 +25,8 @@ class Constants:
         "vanish": 3,
     }
 
+    ADMIN_RANK_ID = 1
+
     EMAIL = ''
     PASSWORD = ''
     PASSWORD_FORGOTTEN_EMAIL: str = "Hey! \nHere's the link to recover your account: https://cryllet-fe.pages.dev/create_password/{token}"

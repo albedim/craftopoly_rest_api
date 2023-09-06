@@ -49,6 +49,12 @@ def signin():
     return UserService.signin(request.json)
 
 
+@user.route("/sync", methods=['POST'])
+@cross_origin()
+def sync():
+    return UserService.sync(Utils.getTokenManually(request), request.json)
+
+
 @user.route("/staffers/command/<command>", methods=['GET'])
 @cross_origin()
 def canCommand(command):
