@@ -47,7 +47,7 @@ class BanService:
                                     400
                                 ), 400
                             else:
-                                finalDateTime = datetime.now() + timedelta(minutes=minutes)
+                                finalDateTime = Utils.datetime() + timedelta(minutes=minutes)
                                 createdBan = BanRepository.create(target.user_id, request['reason'], user.user_id, finalDateTime)
                                 return Utils.createSuccessResponse(
                                     True,

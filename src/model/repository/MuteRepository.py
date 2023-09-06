@@ -4,6 +4,7 @@ from sqlalchemy import text
 
 from src.configuration.config import sql
 from src.model.entity.Mute import Mute
+from src.utils.Utils import Utils
 
 
 class MuteRepository:
@@ -17,11 +18,11 @@ class MuteRepository:
 
     @classmethod
     def getCurrentMute(cls, user_id):
-        mute = sql.session.query(Mute).filter(Mute.user_id == user_id).filter(Mute.ends_on > datetime.datetime.now()).first()
+        mute = sql.session.query(Mute).filter(Mute.user_id == user_id).filter(Mute.ends_on > Utils.datetime()).first()
         return mute
 
     @classmethod
     def removeMute(cls, currentMute):
-        currentMute.ends_on = datetime.datetime.now()
+        currentMute.ends_on = Utils.datetime()
         sql.session.commit()
 

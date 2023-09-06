@@ -184,4 +184,8 @@ class Utils:
         except ValueError:
             return None
 
+    @classmethod
+    def datetime(cls):
+        return datetime.datetime.now() + datetime.timedelta(hours=Constants.HOURS)
+
 

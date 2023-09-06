@@ -20,6 +20,8 @@ class Constants:
     ALREADY_CREATED = "This resource was already created"
     INVALID_REQUEST: str = "Invalid request"
 
+    HOURS = 2
+
     COMMANDS = {
         "teleport": 3,
         "vanish": 3,

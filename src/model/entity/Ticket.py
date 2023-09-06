@@ -1,5 +1,6 @@
 import datetime
 from src.configuration.config import sql
+from src.utils.Utils import Utils
 
 
 class Ticket(sql.Model):
@@ -13,7 +14,7 @@ class Ticket(sql.Model):
     def __init__(self, ownerId):
         self.owner_id = ownerId
         self.open = True
-        self.created_on = datetime.datetime.now()
+        self.created_on = Utils.datetime()
 
     def toJSON(self, **kvargs):
         obj = {

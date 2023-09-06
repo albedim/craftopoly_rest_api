@@ -75,3 +75,8 @@ class UserRepository:
     def createTelegramUserId(cls, user, telegramUserId):
         user.telegram_user_id = telegramUserId
         sql.session.commit()
+
+    @classmethod
+    def removeTelegramUserId(cls, user):
+        user.telegram_user_id = None
+        sql.session.commit()

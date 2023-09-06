@@ -55,10 +55,16 @@ def sync():
     return UserService.sync(Utils.getTokenManually(request), request.json)
 
 
-@user.route("/telegram/create", methods=['PUT'])
+@user.route("/telegram/connect", methods=['PUT'])
 @cross_origin()
 def addTelegramId():
     return UserService.createTelegramUserId(request.json)
+
+
+@user.route("/telegram/disconnect", methods=['PUT'])
+@cross_origin()
+def removeTelegramId():
+    return UserService.removeTelegramUserId(Utils.getTokenManually(request))
 
 
 @user.route("/telegram/generate", methods=['PUT'])

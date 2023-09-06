@@ -1,5 +1,6 @@
 import datetime
 from src.configuration.config import sql
+from src.utils.Utils import Utils
 
 
 class Mute(sql.Model):
@@ -15,7 +16,7 @@ class Mute(sql.Model):
         self.user_id = userId
         self.reason = reason
         self.muted_by = mutedBy
-        self.muted_on = datetime.datetime.now()
+        self.muted_on = Utils.datetime()
         self.ends_on = endsOn
 
     def toJSON(self, **kvargs):

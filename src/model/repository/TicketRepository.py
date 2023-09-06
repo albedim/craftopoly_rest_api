@@ -4,6 +4,7 @@ from sqlalchemy import text, desc
 
 from src.configuration.config import sql
 from src.model.entity.Ticket import Ticket
+from src.utils.Utils import Utils
 
 
 class TicketRepository:
@@ -50,7 +51,7 @@ class TicketRepository:
 
     @classmethod
     def addCloseDate(cls, ticket):
-        ticket.closed_on = datetime.datetime.now()
+        ticket.closed_on = Utils.datetime()
         sql.session.commit()
         return ticket
 

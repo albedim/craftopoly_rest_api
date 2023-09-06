@@ -1,5 +1,6 @@
 import datetime
 from src.configuration.config import sql
+from src.utils.Utils import Utils
 
 
 class Ban(sql.Model):
@@ -15,7 +16,7 @@ class Ban(sql.Model):
         self.user_id = userId
         self.reason = reason
         self.banned_by = mutedBy
-        self.banned_on = datetime.datetime.now()
+        self.banned_on = Utils.datetime()
         self.ends_on = endsOn
 
     def toJSON(self, **kvargs):

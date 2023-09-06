@@ -295,3 +295,18 @@ class UserService:
 
         UserRepository.createTelegramUserId(user, request['telegram_user_id'])
         return Utils.createSuccessResponse(True, user.username)
+
+    @classmethod
+    def removeTelegramUserId(cls, uuid):
+
+        user = UserRepository.getByUUID(uuid)
+        if user is None:
+            return Utils.createWrongResponse(False, Constants.NOT_ENOUGH_PERMISSIONS, 404), 404
+
+        connected = user.telegram_user_id is not None
+
+        if not connected:
+            return Utils.createWrongResponse(False, Constants.NOT_ENOUGH_PERMISSIONS, 404), 404
+
+        UserRepository.removeTelegramUserId(user)
+        return Utils.createSuccessResponse(True, Constants.CREATED)

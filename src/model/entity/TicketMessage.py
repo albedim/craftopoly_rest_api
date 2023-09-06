@@ -1,5 +1,6 @@
 import datetime
 from src.configuration.config import sql
+from src.utils.Utils import Utils
 
 
 class TicketMessage(sql.Model):
@@ -14,7 +15,7 @@ class TicketMessage(sql.Model):
         self.ticket_id = ticketId
         self.user_id = userId
         self.content = content
-        self.created_on = datetime.datetime.now()
+        self.created_on = Utils.datetime()
 
     def toJSON(self, **kvargs):
         obj = {
