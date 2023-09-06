@@ -55,6 +55,18 @@ def sync():
     return UserService.sync(Utils.getTokenManually(request), request.json)
 
 
+@user.route("/telegram/create", methods=['PUT'])
+@cross_origin()
+def addTelegramId():
+    return UserService.createTelegramUserId(request.json)
+
+
+@user.route("/telegram/generate", methods=['PUT'])
+@cross_origin()
+def generateCode():
+    return UserService.generateTelegramCode(Utils.getTokenManually(request))
+
+
 @user.route("/staffers/command/<command>", methods=['GET'])
 @cross_origin()
 def canCommand(command):

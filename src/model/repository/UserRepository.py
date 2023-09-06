@@ -41,6 +41,11 @@ class UserRepository:
         return user
 
     @classmethod
+    def getByTelegramUserId(cls, telegramUserId):
+        user = sql.session.query(User).filter(User.telegram_user_id != None).filter(User.telegram_user_id == telegramUserId).first()
+        return user
+
+    @classmethod
     def getByUserId(cls, userId):
         user = sql.session.query(User).filter(User.user_id == userId).first()
         return user
@@ -54,4 +59,19 @@ class UserRepository:
     @classmethod
     def changeUsername(cls, user, username):
         user.username = username
+        sql.session.commit()
+
+    @classmethod
+    def generateTelegramCode(cls, user, code):
+        user.telegram_code = code
+        sql.session.commit()
+
+    @classmethod
+    def getByTelegramCode(cls, code):
+        user = sql.session.query(User).filter(User.telegram_code == code).first()
+        return user
+
+    @classmethod
+    def createTelegramUserId(cls, user, telegramUserId):
+        user.telegram_user_id = telegramUserId
         sql.session.commit()

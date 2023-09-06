@@ -69,9 +69,9 @@ class UserService:
                 rank.rank_id <= Constants.COMMANDS[command]
             )
         return Utils.createSuccessResponse(
-                True,
-                False
-            )
+            True,
+            False
+        )
 
     @classmethod
     def exists(cls, username):
@@ -135,7 +135,8 @@ class UserService:
         if not Utils.isValid(body, "USER:CREATE"):
             return Utils.createWrongResponse(False, Constants.INVALID_REQUEST, 400), 400
 
-        exists = UserRepository.getByUsername(body['username']) is not None
+        exists = UserRepository.getByUsername(body['username']) is not None or \
+                 UserRepository.getByUUID(body['uuid']) is not None
         if exists:
             return Utils.createWrongResponse(False, Constants.ALREADY_CREATED, 409), 409
 
@@ -254,3 +255,43 @@ class UserService:
                     Constants.NOT_ENOUGH_PERMISSIONS,
                     403
                 ), 403
+
+    @classmethod
+    def generateTelegramCode(cls, uuid):
+        user = UserRepository.getByUUID(uuid)
+
+        if user is None:
+            return Utils.createWrongResponse(
+                False,
+                Constants.NOT_ENOUGH_PERMISSIONS,
+                404
+            ), 404
+
+        if user.telegram_user_id is not None:
+            return Utils.createWrongResponse(
+                False,
+                Constants.NOT_ENOUGH_PERMISSIONS,
+                409
+            ), 409
+
+        code = Utils.createCode(6)
+        UserRepository.generateTelegramCode(
+            user,
+            code
+        )
+
+        return Utils.createSuccessResponse(True, code)
+
+    @classmethod
+    def createTelegramUserId(cls, request):
+        alreadyConnected = UserRepository.getByTelegramUserId(request['telegram_user_id']) is not None
+
+        if alreadyConnected:
+            return Utils.createWrongResponse(False, Constants.NOT_ENOUGH_PERMISSIONS, 409), 409
+
+        user = UserRepository.getByTelegramCode(request['code'])
+        if user is None:
+            return Utils.createWrongResponse(False, Constants.NOT_ENOUGH_PERMISSIONS, 404), 404
+
+        UserRepository.createTelegramUserId(user, request['telegram_user_id'])
+        return Utils.createSuccessResponse(True, user.username)

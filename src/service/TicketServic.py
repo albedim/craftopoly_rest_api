@@ -72,6 +72,29 @@ class TicketService:
                     )
                 else:
                     return Utils.createWrongResponse(False, Constants.NOT_ENOUGH_PERMISSIONS, 403), 403
+            elif platform == "telegram":
+                user = UserRepository.getByTelegramUserId(token)
+                if user is None:
+                    return Utils.createWrongResponse(False, Constants.NOT_FOUND, 404), 404
+                else:
+                    rank = RankRepository.getRank(user.user_id)
+                    if rank.staffer or user.user_id == ticket.owner_id:
+                        messages = TicketMessageRepository.getMessages(ticketId)
+
+                        res = []
+                        counter = page * 10 - 10
+                        while counter < page * 10 and counter < len(messages):
+                            print(messages[counter].user_id)
+                            user = UserRepository.getByUserId(messages[counter].user_id).toJSON()
+                            res.append(messages[counter].toJSON(owner=user))
+                            counter += 1
+
+                        return Utils.createSuccessResponse(
+                            True,
+                            ticket.toJSON(owner=owner.toJSON(), messages=res)
+                        )
+                    else:
+                        return Utils.createWrongResponse(False, Constants.NOT_ENOUGH_PERMISSIONS, 403), 403
 
     @classmethod
     def getAllTickets(cls, page, platform, token):
@@ -164,24 +187,24 @@ class TicketService:
 
     @classmethod
     def create(cls, platform, token, request):
+
+        user = None
+
         if platform == 'mcserver':
             user = UserRepository.getByUUID(token)
-            if user is None:
-                return Utils.createWrongResponse(False, Constants.NOT_FOUND, 404), 404
-            if cls.hasTicketOpen(user.user_id):
-                return Utils.createWrongResponse(False, Constants.ALREADY_CREATED, 409), 409
-            ticket = TicketRepository.create(user.user_id)
-            message = TicketMessageRepository.create(ticket.ticket_id, user.user_id, request['message'])
-            return cls.getTickets("1", user.username)
         elif platform == 'website':
             user = Utils.decodeToken(token)['sub']
-            if user is None:
-                return Utils.createWrongResponse(False, Constants.NOT_FOUND, 404), 404
-            if cls.hasTicketOpen(user['user_id']):
-                return Utils.createWrongResponse(False, Constants.ALREADY_CREATED, 409), 409
-            ticket = TicketRepository.create(user['user_id'])
-            message = TicketMessageRepository.create(ticket.ticket_id, user['user_id'], request['message'])
-            return cls.getTickets("1", user['username'])
+        elif platform == 'telegram':
+            user = UserRepository.getByTelegramUserId(token)
+            print(token, user.toJSON())
+
+        if user is None:
+            return Utils.createWrongResponse(False, Constants.NOT_FOUND, 404), 404
+        if cls.hasTicketOpen(user.user_id):
+            return Utils.createWrongResponse(False, Constants.ALREADY_CREATED, 409), 409
+        ticket = TicketRepository.create(user.user_id)
+        message = TicketMessageRepository.create(ticket.ticket_id, user.user_id, request['message'])
+        return cls.getTickets("1", user.username)
 
     @classmethod
     def closeTicket(cls, platform, ticketId, token):
@@ -216,6 +239,19 @@ class TicketService:
                 ), 403
         elif platform == 'mcserver':
             user = UserRepository.getByUUID(token)
+            rank = RankRepository.getRankById(user.rank_id)
+            if rank.staffer or user.user_id == ticket.owner_id:
+                TicketRepository.closeTicket(ticket)
+                TicketRepository.addCloseDate(ticket)
+                return Utils.createSuccessResponse(True, Constants.CREATED)
+            else:
+                return Utils.createWrongResponse(
+                    False,
+                    Constants.NOT_ENOUGH_PERMISSIONS,
+                    403
+                ), 403
+        if platform == 'telegram':
+            user = UserRepository.getByTelegramUserId(token)
             rank = RankRepository.getRankById(user.rank_id)
             if rank.staffer or user.user_id == ticket.owner_id:
                 TicketRepository.closeTicket(ticket)

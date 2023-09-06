@@ -63,3 +63,22 @@ class TicketMessageService:
                                 Constants.NOT_ENOUGH_PERMISSIONS,
                                 403
                             ), 403
+                if platform == 'telegram':
+                    user = UserRepository.getByTelegramUserId(token)
+                    if user is None:
+                        return Utils.createWrongResponse(
+                            False,
+                            Constants.NOT_FOUND,
+                            404
+                        ), 404
+                    else:
+                        rank = RankRepository.getRankById(user.rank_id)
+                        if rank.staffer or user.user_id == ticket.owner_id:
+                            message = TicketMessageRepository.create(request['ticket_id'], user.user_id, request['message'])
+                            return Utils.createSuccessResponse(True, message.toJSON())
+                        else:
+                            return Utils.createWrongResponse(
+                                False,
+                                Constants.NOT_ENOUGH_PERMISSIONS,
+                                403
+                            ), 403
