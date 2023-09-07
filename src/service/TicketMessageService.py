@@ -10,18 +10,26 @@ class TicketMessageService:
 
     @classmethod
     def create(cls, platform, token, request):
+
+        if not Utils.isValid(request, "TICKET_MESSAGE:CREATE"):
+            return Utils.createWrongResponse(
+                False,
+                Constants.INVALID_REQUEST,
+                400
+            ), 400
+
         ticket = TicketRepository.getTicket(request['ticket_id'])
         if ticket is None:
             return Utils.createWrongResponse(
                 False,
-                Constants.NOT_FOUND,
+                "ticket not found",
                 404
             ), 404
         else:
             if not ticket.open:
                 return Utils.createWrongResponse(
                     False,
-                    Constants.NOT_ENOUGH_PERMISSIONS,
+                    "ticket is closed",
                     422
                 ), 422
             else:
@@ -30,7 +38,7 @@ class TicketMessageService:
                     if user is None:
                         return Utils.createWrongResponse(
                             False,
-                            Constants.NOT_FOUND,
+                            "user not found",
                             404
                         ), 404
                     else:
@@ -41,7 +49,7 @@ class TicketMessageService:
                         else:
                             return Utils.createWrongResponse(
                                 False,
-                                Constants.NOT_ENOUGH_PERMISSIONS,
+                                "you are not a staffer / ticket owner",
                                 403
                             ), 403
                 elif platform == 'website':
@@ -49,7 +57,7 @@ class TicketMessageService:
                     if user is None:
                         return Utils.createWrongResponse(
                             False,
-                            Constants.NOT_FOUND,
+                            "user not found",
                             404
                         ), 404
                     else:
@@ -60,7 +68,7 @@ class TicketMessageService:
                         else:
                             return Utils.createWrongResponse(
                                 False,
-                                Constants.NOT_ENOUGH_PERMISSIONS,
+                                "you are not a staffer / ticket owner",
                                 403
                             ), 403
                 if platform == 'telegram':
@@ -68,7 +76,7 @@ class TicketMessageService:
                     if user is None:
                         return Utils.createWrongResponse(
                             False,
-                            Constants.NOT_FOUND,
+                            "user nor found",
                             404
                         ), 404
                     else:
@@ -79,6 +87,6 @@ class TicketMessageService:
                         else:
                             return Utils.createWrongResponse(
                                 False,
-                                Constants.NOT_ENOUGH_PERMISSIONS,
+                                "you are not a staffer / ticket owner",
                                 403
                             ), 403

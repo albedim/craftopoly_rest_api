@@ -8,26 +8,51 @@ SCHEMA = [
         }
     },
     {
-        "name": "SIGNUP_USER",
+        "name": "BAN:CREATE",
         "schema": {
-            "complete_name": str,
-            "email": str,
+            "username": str,
+            "time": str,
+            "reason": str
+        }
+    },
+    {
+        "name": "MUTE:CREATE",
+        "schema": {
+            "username": str,
+            "time": str,
+            "reason": str
+        }
+    },
+    {
+        "name": "TICKET:CREATE",
+        "schema": {
+            "message": str
+        }
+    },
+    {
+        "name": "RANK:UPGRADE",
+        "schema": {
+            "username": str
+        }
+    },
+    {
+        "name": "USER:SIGNIN",
+        "schema": {
+            "username": str,
             "password": str
         }
     },
     {
-        "name": "CHANGE",
+        "name": "RANK:DOWNGRADE",
         "schema": {
-            "email": str,
-            "complete_name": str,
-            "password": str
+            "username": str
         }
     },
     {
-        "name": "CHANGE_PASSWORD",
+        "name": "TICKET_MESSAGE:CREATE",
         "schema": {
-            "user_id": int,
-            "password": str
+            "ticket_id": int,
+            "message": str
         }
     }
 ]

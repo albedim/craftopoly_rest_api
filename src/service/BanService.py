@@ -14,12 +14,20 @@ class BanService:
 
     @classmethod
     def ban(cls, request, token):
+
+        if not Utils.isValid(request, "BAN:CREATE"):
+            return Utils.createWrongResponse(
+                False,
+                Constants.INVALID_REQUEST,
+                400
+            ), 400
+
         user = UserRepository.getByUUID(token)
         target = UserRepository.getByUsername(request['username'])
         if target is None or user is None:
             return Utils.createWrongResponse(
                 False,
-                Constants.NOT_FOUND,
+                "user / target not found",
                 404
             ), 404
         else:
@@ -43,7 +51,7 @@ class BanService:
                             if minutes is None:
                                 return Utils.createWrongResponse(
                                     False,
-                                    Constants.ALREADY_CREATED,
+                                    "time format is wrong. (xh/xd/xm/xy)",
                                     400
                                 ), 400
                             else:
@@ -58,19 +66,19 @@ class BanService:
                     else:
                         return Utils.createWrongResponse(
                             False,
-                            Constants.ALREADY_CREATED,
+                            "user already banned",
                             409
                         ), 409
                 else:
                     return Utils.createWrongResponse(
                         False,
-                        Constants.NOT_ENOUGH_PERMISSIONS,
+                        "you can't ban founders",
                         403
                     ), 403
             else:
                 return Utils.createWrongResponse(
                     False,
-                    Constants.NOT_ENOUGH_PERMISSIONS,
+                    "you don't have enough permissions to ban this user",
                     403
                 ), 403
 
@@ -80,7 +88,7 @@ class BanService:
         if user is None:
             return Utils.createWrongResponse(
                 False,
-                Constants.NOT_FOUND,
+                "user not found",
                 404
             ), 404
         currentBan = BanRepository.getCurrentBan(user.user_id)
@@ -96,7 +104,7 @@ class BanService:
         else:
             return Utils.createWrongResponse(
                 False,
-                Constants.NOT_FOUND,
+                "user is not banned",
                 404
             ), 404
 
@@ -107,7 +115,7 @@ class BanService:
         if user is None or target is None:
             return Utils.createWrongResponse(
                 False,
-                Constants.NOT_ENOUGH_PERMISSIONS,
+                "user / target not found",
                 404
             ), 404
         else:
@@ -118,18 +126,18 @@ class BanService:
                     BanRepository.removeBan(currentBan)
                     return Utils.createSuccessResponse(
                         True,
-                        Constants.CREATED
+                        "user successfully unbanned"
                     )
                 else:
                     return Utils.createWrongResponse(
                         False,
-                        Constants.NOT_ENOUGH_PERMISSIONS,
+                        "user is not banned",
                         404
                     ), 404
             else:
                 return Utils.createWrongResponse(
                     False,
-                    Constants.NOT_ENOUGH_PERMISSIONS,
+                    "you don't have enough permissions to ban this user",
                     403
                 ), 403
 

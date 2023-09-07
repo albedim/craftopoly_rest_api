@@ -19,6 +19,12 @@ def getUser(username):
     return UserService.getUser(username)
 
 
+@user.route("/telegram/<telegramUserId>", methods=['GET'])
+@cross_origin()
+def getUserByTelegramId(telegramUserId):
+    return UserService.getUserByTelegramId(telegramUserId)
+
+
 @user.route("/<username>/exists", methods=['GET'])
 @cross_origin()
 def exists(username):

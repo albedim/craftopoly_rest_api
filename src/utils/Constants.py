@@ -27,7 +27,9 @@ class Constants:
         "vanish": 3,
     }
 
-    ADMIN_RANK_ID = 1
+    PEDINA_RANK_ID = 5
+    ADMIN_RANK_ID = 2
+    FOUNDER_RANK_ID = 1
 
     EMAIL = ''
     PASSWORD = ''
