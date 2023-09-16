@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from flask_cors import cross_origin
+from flask_cors import cross_origin, CORS
 from src.service.UserService import UserService
 from src.utils.Utils import Utils
 
@@ -17,6 +17,12 @@ def getRank(username):
 @cross_origin()
 def getUser(username):
     return UserService.getUser(username)
+
+
+@user.route("/discord/<discordUserId>", methods=['GET'])
+@cross_origin()
+def getUserByDiscordId(discordUserId):
+    return UserService.getUserByDiscordId(discordUserId)
 
 
 @user.route("/telegram/<telegramUserId>", methods=['GET'])
@@ -59,6 +65,24 @@ def signin():
 @cross_origin()
 def sync():
     return UserService.sync(Utils.getTokenManually(request), request.json)
+
+
+@user.route("/discord/connect", methods=['PUT'])
+@cross_origin()
+def addDiscordId():
+    return UserService.createDiscordUserId(request.json)
+
+
+@user.route("/discord/disconnect", methods=['PUT'])
+@cross_origin()
+def removeDiscordId():
+    return UserService.removeDiscordUserId(Utils.getTokenManually(request))
+
+
+@user.route("/discord/generate", methods=['PUT'])
+@cross_origin()
+def generateDiscordCode():
+    return UserService.generateDiscordCode(Utils.getTokenManually(request))
 
 
 @user.route("/telegram/connect", methods=['PUT'])

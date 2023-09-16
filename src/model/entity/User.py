@@ -9,6 +9,8 @@ class User(sql.Model):
     username: str = sql.Column(sql.String(40), nullable=False)
     level: int = sql.Column(sql.Integer, nullable=False)
     uuid: str = sql.Column(sql.String(140), nullable=False)
+    discord_user_id: str = sql.Column(sql.String(54), nullable=True)
+    discord_code: str = sql.Column(sql.String(6), nullable=True)
     telegram_user_id: str = sql.Column(sql.String(54), nullable=True)
     telegram_code: str = sql.Column(sql.String(6), nullable=True)
     created_on: datetime.date = sql.Column(sql.Date, nullable=True)

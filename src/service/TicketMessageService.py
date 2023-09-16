@@ -33,60 +33,33 @@ class TicketMessageService:
                     422
                 ), 422
             else:
+
+                user = None
+
                 if platform == 'mcserver':
                     user = UserRepository.getByUUID(token)
-                    if user is None:
-                        return Utils.createWrongResponse(
-                            False,
-                            "user not found",
-                            404
-                        ), 404
-                    else:
-                        rank = RankRepository.getRankById(user.rank_id)
-                        if rank.staffer or user.user_id == ticket.owner_id:
-                            message = TicketMessageRepository.create(request['ticket_id'], user.user_id, request['message'])
-                            return Utils.createSuccessResponse(True, message.toJSON())
-                        else:
-                            return Utils.createWrongResponse(
-                                False,
-                                "you are not a staffer / ticket owner",
-                                403
-                            ), 403
-                elif platform == 'website':
+                if platform == 'website':
                     user = Utils.decodeToken(token)['sub']
-                    if user is None:
-                        return Utils.createWrongResponse(
-                            False,
-                            "user not found",
-                            404
-                        ), 404
-                    else:
-                        rank = RankRepository.getRankById(user['rank_id'])
-                        if rank.staffer or user['user_id'] == ticket.owner_id:
-                            message = TicketMessageRepository.create(request['ticket_id'], user['user_id'], request['message'])
-                            return Utils.createSuccessResponse(True, message.toJSON())
-                        else:
-                            return Utils.createWrongResponse(
-                                False,
-                                "you are not a staffer / ticket owner",
-                                403
-                            ), 403
+                    user = UserRepository.getByUserId(user['user_id'])
                 if platform == 'telegram':
                     user = UserRepository.getByTelegramUserId(token)
-                    if user is None:
+                if platform == 'discord':
+                    user = UserRepository.getByDiscordUserId(token)
+
+                if user is None:
+                    return Utils.createWrongResponse(
+                        False,
+                        "user not found",
+                        404
+                    ), 404
+                else:
+                    rank = RankRepository.getRankById(user.rank_id)
+                    if rank.staffer or user.user_id == ticket.owner_id:
+                        message = TicketMessageRepository.create(request['ticket_id'], user.user_id, request['message'])
+                        return Utils.createSuccessResponse(True, message.toJSON())
+                    else:
                         return Utils.createWrongResponse(
                             False,
-                            "user nor found",
-                            404
-                        ), 404
-                    else:
-                        rank = RankRepository.getRankById(user.rank_id)
-                        if rank.staffer or user.user_id == ticket.owner_id:
-                            message = TicketMessageRepository.create(request['ticket_id'], user.user_id, request['message'])
-                            return Utils.createSuccessResponse(True, message.toJSON())
-                        else:
-                            return Utils.createWrongResponse(
-                                False,
-                                "you are not a staffer / ticket owner",
-                                403
-                            ), 403
+                            "you are not a staffer / ticket owner",
+                            403
+                        ), 403

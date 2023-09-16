@@ -62,6 +62,26 @@ class UserRepository:
         sql.session.commit()
 
     @classmethod
+    def generateDiscordCode(cls, user, code):
+        user.discord_code = code
+        sql.session.commit()
+
+    @classmethod
+    def getByDiscordCode(cls, code):
+        user = sql.session.query(User).filter(User.discord_code == code).first()
+        return user
+
+    @classmethod
+    def createDiscordUserId(cls, user, discordUserId):
+        user.discord_user_id = discordUserId
+        sql.session.commit()
+
+    @classmethod
+    def removeTelegramUserId(cls, user):
+        user.telegram_user_id = None
+        sql.session.commit()
+
+    @classmethod
     def generateTelegramCode(cls, user, code):
         user.telegram_code = code
         sql.session.commit()
@@ -72,11 +92,16 @@ class UserRepository:
         return user
 
     @classmethod
+    def getByDiscordUserId(cls, discordUserId):
+        user = sql.session.query(User).filter(User.discord_user_id == discordUserId).first()
+        return user
+
+    @classmethod
     def createTelegramUserId(cls, user, telegramUserId):
         user.telegram_user_id = telegramUserId
         sql.session.commit()
 
     @classmethod
-    def removeTelegramUserId(cls, user):
-        user.telegram_user_id = None
+    def removeDiscordUserId(cls, user):
+        user.discord_user_id = None
         sql.session.commit()

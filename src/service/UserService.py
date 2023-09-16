@@ -113,6 +113,22 @@ class UserService:
         )
 
     @classmethod
+    def getUserByDiscordId(cls, discordUserId):
+        user = UserRepository.getByDiscordUserId(discordUserId)
+
+        if user is None:
+            return Utils.createWrongResponse(
+                False,
+                "user not found",
+                404
+            ), 404
+
+        return Utils.createSuccessResponse(
+            True,
+            user.toJSON()
+        )
+
+    @classmethod
     def getStaffers(cls):
         return Utils.createSuccessResponse(
             True,
@@ -152,7 +168,8 @@ class UserService:
             return Utils.createWrongResponse(False, "user not found", 404), 404
 
         return Utils.createSuccessResponse(True, {
-            'token': create_access_token(user.toJSON(), expires_delta=timedelta(weeks=4))
+            'token': create_access_token(user.toJSON(), expires_delta=timedelta(weeks=4)),
+            'avatar': "https://mc-heads.net/avatar/" + user.username
         })
 
     @classmethod
@@ -325,6 +342,32 @@ class UserService:
         return Utils.createSuccessResponse(True, code)
 
     @classmethod
+    def generateDiscordCode(cls, uuid):
+        user = UserRepository.getByUUID(uuid)
+
+        if user is None:
+            return Utils.createWrongResponse(
+                False,
+                "user not found",
+                404
+            ), 404
+
+        if user.discord_user_id is not None:
+            return Utils.createWrongResponse(
+                False,
+                "user already connected to discord",
+                409
+            ), 409
+
+        code = Utils.createCode(6)
+        UserRepository.generateDiscordCode(
+            user,
+            code
+        )
+
+        return Utils.createSuccessResponse(True, code)
+
+    @classmethod
     def createTelegramUserId(cls, request):
 
         alreadyConnected = UserRepository.getByTelegramUserId(request['telegram_user_id']) is not None
@@ -340,6 +383,21 @@ class UserService:
         return Utils.createSuccessResponse(True, user.username)
 
     @classmethod
+    def createDiscordUserId(cls, request):
+
+        alreadyConnected = UserRepository.getByDiscordUserId(request['discord_user_id']) is not None
+
+        if alreadyConnected:
+            return Utils.createWrongResponse(False, "user already connected to discord", 409), 409
+
+        user = UserRepository.getByDiscordCode(request['code'])
+        if user is None:
+            return Utils.createWrongResponse(False, "user not found", 404), 404
+
+        UserRepository.createDiscordUserId(user, request['discord_user_id'])
+        return Utils.createSuccessResponse(True, user.username)
+
+    @classmethod
     def removeTelegramUserId(cls, uuid):
 
         user = UserRepository.getByUUID(uuid)
@@ -352,4 +410,19 @@ class UserService:
             return Utils.createWrongResponse(False, "user is not connected to a telegram account", 404), 404
 
         UserRepository.removeTelegramUserId(user)
+        return Utils.createSuccessResponse(True, "connected")
+
+    @classmethod
+    def removeDiscordUserId(cls, uuid):
+
+        user = UserRepository.getByUUID(uuid)
+        if user is None:
+            return Utils.createWrongResponse(False, "user not found", 404), 404
+
+        connected = user.discord_user_id is not None
+
+        if not connected:
+            return Utils.createWrongResponse(False, "user is not connected to a discord account", 404), 404
+
+        UserRepository.removeDiscordUserId(user)
         return Utils.createSuccessResponse(True, "connected")

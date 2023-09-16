@@ -39,6 +39,8 @@ class TicketService:
                 user = UserRepository.getByUserId(user['user_id'])
             elif platform == "telegram":
                 user = UserRepository.getByTelegramUserId(token)
+            elif platform == "discord":
+                user = UserRepository.getByDiscordUserId(token)
 
             if user is None:
                 return Utils.createWrongResponse(False, "user not found", 404), 404
@@ -80,6 +82,8 @@ class TicketService:
             user = UserRepository.getByUserId(user['user_id'])
         elif platform == "telegram":
             user = UserRepository.getByTelegramUserId(token)
+        elif platform == "discord":
+            user = UserRepository.getByDiscordUserId(token)
 
         if user is None:
             return Utils.createWrongResponse(False, "user not found", 404), 404
@@ -153,6 +157,8 @@ class TicketService:
             user = Utils.decodeToken(token)['sub']
         elif platform == 'telegram':
             user = UserRepository.getByTelegramUserId(token)
+        elif platform == "discord":
+            user = UserRepository.getByDiscordUserId(token)
 
         if user is None:
             return Utils.createWrongResponse(False, Constants.NOT_FOUND, 404), 404
@@ -189,6 +195,8 @@ class TicketService:
             user = UserRepository.getByUserId(user['user_id'])
         elif platform == "telegram":
             user = UserRepository.getByTelegramUserId(token)
+        elif platform == "discord":
+            user = UserRepository.getByDiscordUserId(token)
 
         if user is None:
             return Utils.createWrongResponse(False, "user not found", 404), 404
