@@ -1,5 +1,6 @@
 import datetime
 from src.configuration.config import sql
+from src.utils.Constants import Constants
 
 
 class User(sql.Model):
@@ -15,13 +16,19 @@ class User(sql.Model):
     telegram_code: str = sql.Column(sql.String(6), nullable=True)
     created_on: datetime.date = sql.Column(sql.Date, nullable=True)
     rank_id: int = sql.Column(sql.Integer, nullable=False)
+    dices: int = sql.Column(sql.Integer, nullable=False)
+    final_space: int = sql.Column(sql.Integer, nullable=False)
+    money: int = sql.Column(sql.Integer, nullable=False)
 
     def __init__(self, uuid, username, password):
         self.username = username
         self.uuid = uuid
         self.password = password
         self.rank_id = 5
+        self.final_space = 0
         self.level = 0
+        self.dices = Constants.DEFAULT_DICES
+        self.money = Constants.DEFAULT_MONEY
         self.created_on = datetime.date.today()
 
     def toJSON(self, **kvargs):
@@ -29,6 +36,9 @@ class User(sql.Model):
             'user_id': self.user_id,
             'username': self.username,
             'uuid': self.uuid,
+            'money': self.money,
+            'final_space': self.final_space,
+            'dices': self.dices,
             'level': self.level,
             'created_on': str(self.created_on),
             'rank_id': self.rank_id

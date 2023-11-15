@@ -61,6 +61,48 @@ def signin():
     return UserService.signin(request.json)
 
 
+@user.route("/dices/add", methods=['POST'])
+@cross_origin()
+def addDices():
+    return UserService.addDices(request.json, Utils.getTokenManually(request))
+
+
+@user.route("/bank/rob", methods=['POST'])
+@cross_origin()
+def robFromBank():
+    return UserService.robFromBank(Utils.getTokenManually(request), request.json)
+
+
+@user.route("/bank/prepare", methods=['POST'])
+@cross_origin()
+def prepareBank():
+    return UserService.prepareBank(Utils.getTokenManually(request), request.json)
+
+
+@user.route("/<username>/bank/rewards", methods=['GET'])
+@cross_origin()
+def getRewards(username):
+    return UserService.getRewards(username)
+
+
+@user.route("/money/take", methods=['POST'])
+@cross_origin()
+def takeMoney():
+    return UserService.takeMoney(Utils.getTokenManually(request))
+
+
+@user.route("/money/add", methods=['POST'])
+@cross_origin()
+def addMoney():
+    return UserService.addMoney(Utils.getTokenManually(request))
+
+
+@user.route("/dices/use", methods=['PUT'])
+@cross_origin()
+def useDice():
+    return UserService.useDice(request.json, Utils.getTokenManually(request))
+
+
 @user.route("/sync", methods=['POST'])
 @cross_origin()
 def sync():

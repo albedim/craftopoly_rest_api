@@ -1,8 +1,10 @@
 from sqlalchemy import text
 
 from src.configuration.config import sql
+from src.model.entity.Purchase import Purchase
 from src.model.entity.Rank import Rank
 from src.model.entity.User import User
+from src.utils.Constants import Constants
 
 
 class UserRepository:
@@ -105,3 +107,50 @@ class UserRepository:
     def removeDiscordUserId(cls, user):
         user.discord_user_id = None
         sql.session.commit()
+
+    @classmethod
+    def useDice(cls, finalSpace, user):
+        user.dices -= 1
+        user.final_space = finalSpace
+        sql.session.commit()
+        return user
+
+    @classmethod
+    def useDiceWithMoney(cls, finalSpace, user):
+        user.money -= Constants.MONEY_PER_TURN
+        user.final_space = finalSpace
+        sql.session.commit()
+        return user
+
+    @classmethod
+    def addDices(cls, dices, user):
+        user.dices += dices
+        sql.session.commit()
+        return user
+
+    @classmethod
+    def addMoney(cls, money, user):
+        user.money += money
+        sql.session.commit()
+        return user
+
+    @classmethod
+    def takeMoney(cls, money, user):
+        user.money -= money
+        sql.session.commit()
+        return user
+
+    @classmethod
+    def getUsers(cls):
+        users = sql.session.query(User).all()
+        return users
+
+    @classmethod
+    def getPurchasersOf(cls, placeId):
+        places = sql.session.query(User, Purchase.level).join(Purchase, Purchase.user_id == User.user_id).filter(Purchase.place_id == placeId).all()
+        return places
+
+    @classmethod
+    def getUsersExclude(cls, user_id):
+        users = sql.session.query(User).filter(User.user_id != user_id).all()
+        return users

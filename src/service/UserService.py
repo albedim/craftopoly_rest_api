@@ -1,8 +1,11 @@
 import datetime
+import random
 from datetime import timedelta
 from typing import Any
 from flask_jwt_extended import create_access_token
 from src.model.entity.User import User
+from src.model.repository.NotificationRepository import NotificationRepository
+from src.model.repository.PlaceRepository import PlaceRepository
 from src.model.repository.RankRepository import RankRepository
 from src.model.repository.UserRepository import UserRepository
 from src.service.RankService import RankService
@@ -168,8 +171,8 @@ class UserService:
             return Utils.createWrongResponse(False, "user not found", 404), 404
 
         return Utils.createSuccessResponse(True, {
-            'token': create_access_token(user.toJSON(), expires_delta=timedelta(weeks=4)),
-            'avatar': "https://mc-heads.net/avatar/" + user.username
+            'token': create_access_token({'user_id': user.user_id, 'expires_in': 14}, expires_delta=timedelta(days=14)),
+            'avatar': "https://mc-heads.net/head/" + user.username
         })
 
     @classmethod
@@ -410,7 +413,7 @@ class UserService:
             return Utils.createWrongResponse(False, "user is not connected to a telegram account", 404), 404
 
         UserRepository.removeTelegramUserId(user)
-        return Utils.createSuccessResponse(True, "connected")
+        return Utils.createSuccessResponse(True, "disconnected")
 
     @classmethod
     def removeDiscordUserId(cls, uuid):
@@ -425,4 +428,100 @@ class UserService:
             return Utils.createWrongResponse(False, "user is not connected to a discord account", 404), 404
 
         UserRepository.removeDiscordUserId(user)
-        return Utils.createSuccessResponse(True, "connected")
+        return Utils.createSuccessResponse(True, "disconnected")
+
+    @classmethod
+    def useDice(cls, request, token):
+        user = UserRepository.getByUUID(token)
+        if user is None:
+            return Utils.createWrongResponse(False, "user not found", 404), 404
+        """
+        if user.dices < 1:
+            return Utils.createWrongResponse(False, "not enough dices", 403), 403
+        """
+        if user.money - Constants.MONEY_PER_TURN < 0:
+            return Utils.createWrongResponse(False, "not enough money", 403), 403
+        UserRepository.useDiceWithMoney(request['final_space'], user)
+        return Utils.createSuccessResponse(True, {
+            'money': Constants.MONEY_PER_TURN
+        })
+
+    @classmethod
+    def addDices(cls, request, token):
+        user = UserRepository.getByUUID(token)
+        if user is None:
+            return Utils.createWrongResponse(False, "user not found", 404), 404
+        UserRepository.addDices(request['dices'], user)
+        return Utils.createSuccessResponse(True, "used")
+
+    @classmethod
+    def addMoney(cls, token):
+        user = UserRepository.getByUUID(token)
+        boughtPlaces = len(PlaceRepository.getPlacesOf(user.user_id))
+        money = 2 * (Constants.DEFAULT_MONEY if boughtPlaces == 0 else Constants.DEFAULT_MONEY * boughtPlaces)
+        if user is None:
+            return Utils.createWrongResponse(False, "user not found", 404), 404
+        UserRepository.addMoney(money, user)
+        return Utils.createSuccessResponse(True, {
+            'amount': money
+        })
+
+    @classmethod
+    def prepareBank(cls, token, request):
+        user = UserRepository.getByUUID(token)
+        if user is None:
+            return Utils.createWrongResponse(False, "user not found", 404), 404
+        targets = UserRepository.getUsersExclude(user.user_id)
+        newTargets = []
+        for target in targets:
+            if target.username not in request['online_players']:
+                newTargets.append(target)
+        target = random.choice(newTargets)
+        return Utils.createSuccessResponse(True, {
+            'user': target.toJSON(),
+            'max_reward': cls.getMoneyPercentages(target.money)[0]
+        })
+
+    @classmethod
+    def getRewards(cls, username):
+        user = UserRepository.getByUsername(username)
+        if user is None:
+            return Utils.createWrongResponse(False, "user not found", 404), 404
+        return Utils.createSuccessResponse(True, {
+            'rewards': cls.getMoneyPercentages(user.money)
+        })
+
+    @classmethod
+    def getMoneyPercentages(cls, money):
+        array = []
+        for percentage in Constants.PERCENTAGES:
+            array.append((percentage * money) / 100)
+        return array
+
+    @classmethod
+    def takeMoney(cls, token):
+        user = UserRepository.getByUUID(token)
+        boughtPlaces = len(PlaceRepository.getPlacesOf(user.user_id))
+        money = Constants.DEFAULT_MONEY if boughtPlaces == 0 else Constants.DEFAULT_MONEY * boughtPlaces
+        if user is None:
+            return Utils.createWrongResponse(False, "user not found", 404), 404
+        UserRepository.takeMoney(money, user)
+        return Utils.createSuccessResponse(True, {
+            'amount': money
+        })
+
+    @classmethod
+    def robFromBank(cls, token, request):
+        user = UserRepository.getByUUID(token)
+        target = UserRepository.getByUsername(request['target_username'])
+        if target is None or user is None:
+            return Utils.createWrongResponse(False, "user not found", 404), 404
+        UserRepository.addMoney(request['money'], user)
+        UserRepository.takeMoney(request['money'], target)
+        NotificationRepository.create(
+            target.user_id,
+            Constants.NOTIFICATIONS['bank']
+            .replace("{username}", user.username)
+            .replace("{money}", str(request['money']))
+        )
+        return Utils.createSuccessResponse(True, "used")

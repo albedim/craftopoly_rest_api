@@ -11,6 +11,8 @@ from datetime import datetime
 #
 
 class Constants:
+    MONEY_PER_TURN = 40
+    PERCENTAGES = [25,20,15,10]
     USER_NOT_FOUND: str = "This user was not found"
     NOT_FOUND: str = "Not found"
     NOT_ENOUGH_PERMISSIONS: str = "Not enough permissions"
@@ -27,9 +29,17 @@ class Constants:
         "vanish": 3,
     }
 
+    NOTIFICATIONS = {
+            'bank': '§a{username} §7ha rubato §a{money}€ §7dalla tua banca',
+            'rent': '§a{username} §7ha pagato un tuo affitto a §a{amount}€'
+    }
+
     PEDINA_RANK_ID = 5
     ADMIN_RANK_ID = 2
     FOUNDER_RANK_ID = 1
+
+    DEFAULT_MONEY = 15000
+    DEFAULT_DICES = 45
 
     EMAIL = ''
     PASSWORD = ''
