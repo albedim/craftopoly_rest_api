@@ -18,15 +18,18 @@ class User(sql.Model):
     rank_id: int = sql.Column(sql.Integer, nullable=False)
     dices: int = sql.Column(sql.Integer, nullable=False)
     final_space: int = sql.Column(sql.Integer, nullable=False)
+    last_join: datetime.datetime = sql.Column(sql.DateTime, nullable=False)
+    last_quit: datetime.datetime = sql.Column(sql.DateTime, nullable=True)
     money: int = sql.Column(sql.Integer, nullable=False)
 
     def __init__(self, uuid, username, password):
         self.username = username
         self.uuid = uuid
         self.password = password
-        self.rank_id = 5
+        self.rank_id = Constants.PEDINA_RANK_ID
         self.final_space = 0
         self.level = 0
+        self.last_join = datetime.datetime.now()
         self.dices = Constants.DEFAULT_DICES
         self.money = Constants.DEFAULT_MONEY
         self.created_on = datetime.date.today()
@@ -38,6 +41,8 @@ class User(sql.Model):
             'uuid': self.uuid,
             'money': self.money,
             'final_space': self.final_space,
+            'last_join': self.last_join,
+            'last_quit': self.last_quit,
             'dices': self.dices,
             'level': self.level,
             'created_on': str(self.created_on),

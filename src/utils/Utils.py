@@ -134,23 +134,9 @@ class Utils:
         return jwt.decode(token, 'super-secret', algorithms=["HS256"])
 
     @classmethod
-    def fixNumber(cls, number):
-        if number < 999:
-            return str(number)
-        if number > 999 and number < 10000:
-            return str(number)[0]+"."+str(number)[1]+"k"
-        if number > 9999 and number < 100000:
-            return str(number)[0:2]+"."+str(number)[2]+"k"
-        if number > 99999 and number < 1000000:
-            return str(number)[0:3]+"."+str(number)[3]+"k"
-        if number > 999999 and number < 10000000:
-            return str(number)[0]+"."+str(number)[1:3]+"M"
-        if number > 9999999 and number < 100000000:
-            return str(number)[0:2]+"."+str(number)[2]+"M"
-        if number > 99999999 and number < 1000000000:
-            return str(number)[0:3]+"M"
-        if number > 1000000000:
-            return str(number)[0]+"MLD"
+    def fixNumber(cls, amount):
+        formatted_amount = "{:,.2f}".format(amount).replace(",", "_").replace(".", ",").replace("_", ".")[:-3]
+        return formatted_amount
 
     @classmethod
     def minuteMuteConverter(cls, time):

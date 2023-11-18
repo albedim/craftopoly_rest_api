@@ -28,7 +28,7 @@ class PlaceService:
         places = PlaceRepository.getPlacesOf(user.user_id)
         array = []
         for place in places:
-            array.append(place[0].toJSON(level=place[1]))
+            array.append(place[0].toJSON(coords=place[2], level=place[1], rent_cost=Utils.fixNumber(place[0].cost * place[1])))
         return Utils.createSuccessResponse(True, array)
 
     @classmethod
@@ -61,7 +61,7 @@ class PlaceService:
                 UserRepository.addMoney(place.cost * purchaser[1], purchaser[0])
                 NotificationRepository.create(purchaser[0].user_id, Constants.NOTIFICATIONS['rent'].replace("{username}", user.username).replace("{amount}", str(place.cost * purchaser[1])))
             return Utils.createSuccessResponse(True, {
-                'amount': place.cost * 5,
+                'amount': Utils.fixNumber(place.cost * 5),
                 'owns': False,
                 'payment_required': len(purchasers) > 0,
                 'place': place.toJSON()
@@ -75,8 +75,25 @@ class PlaceService:
         return Utils.createWrongResponse(False, "up to date", 403), 403
 
     @classmethod
-    def getPlace(cls, placeId):
-        place = PlaceRepository.getPlace(placeId)
+    def getPlace(cls, uuid, placeId):
+        user = UserRepository.getByUUID(uuid)
+        if user is None:
+            return Utils.createWrongResponse(False, "user not found", 404), 404
+        place = PlaceRepository.getPlace(placeId, user.user_id)
         if place is None:
             return Utils.createWrongResponse(False, "place not found", 404), 404
-        return Utils.createSuccessResponse(True, place.toJSON())
+        return Utils.createSuccessResponse(True, place[0].toJSON(coords=place[2]))
+
+    @classmethod
+    def getPlaceInCoords(cls, x, z):
+        places = PlaceRepository.getPurchasedPlaces()
+        print(places)
+        for place in places:
+            minX = int(place[1].split(",")[0]) - place[0].r
+            maxX = int(place[1].split(",")[0]) + place[0].r
+            y = int(place[1].split(",")[1])
+            minZ = int(place[1].split(",")[2]) - place[0].r
+            maxZ = int(place[1].split(",")[2]) + place[0].r
+            if float(x) > minX and float(x) < maxX and float(z) > minZ and float(z) < maxZ:
+                return Utils.createSuccessResponse(True, place[0].toJSON(owner=place[2].toJSON()))
+        return Utils.createWrongResponse(False, "not found", 404), 404

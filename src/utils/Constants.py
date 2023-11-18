@@ -11,8 +11,9 @@ from datetime import datetime
 #
 
 class Constants:
+    DAILY_MONEY_BONUS = 5000
     MONEY_PER_TURN = 40
-    PERCENTAGES = [25,20,15,10]
+    PERCENTAGES = [20,17,14,10]
     USER_NOT_FOUND: str = "This user was not found"
     NOT_FOUND: str = "Not found"
     NOT_ENOUGH_PERMISSIONS: str = "Not enough permissions"
@@ -35,11 +36,13 @@ class Constants:
     }
 
     PEDINA_RANK_ID = 5
+
+    CONSOLE_UUID = "SA28S2O346FN2H2HB82BE8"
+
     ADMIN_RANK_ID = 2
     FOUNDER_RANK_ID = 1
 
     DEFAULT_MONEY = 15000
-    DEFAULT_DICES = 45
 
     EMAIL = ''
     PASSWORD = ''

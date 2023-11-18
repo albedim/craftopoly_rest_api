@@ -96,7 +96,7 @@ class UserService:
 
         return Utils.createSuccessResponse(
             True,
-            user.toJSON()
+            user.toJSON(money=Utils.fixNumber(user.money))
         )
 
     @classmethod
@@ -199,26 +199,66 @@ class UserService:
                 400
             ), 400
 
-        user = UserRepository.getByUUID(uuid)
-        if user is None:
-            return Utils.createWrongResponse(
-                False,
-                "user not found",
-                404
-            ), 404
+        if uuid == Constants.CONSOLE_UUID:
+            target = UserRepository.getByUsername(request['username'])
+            if target is None:
+                return Utils.createWrongResponse(
+                    False,
+                    "target not found",
+                    404
+                ), 404
+            else:
+                if Constants.FOUNDER_RANK_ID < target.rank_id < Constants.PEDINA_RANK_ID:
+                    target = UserRepository.editRank(target, RankService.getUpgradeRank(target))
+                    return Utils.createSuccessResponse(
+                        True,
+                        RankRepository.getRankById(target.rank_id).name
+                    )
+                return Utils.createWrongResponse(
+                    False,
+                    "you can't change this rank",
+                    403
+                ), 403
         else:
-            if user.rank_id == Constants.FOUNDER_RANK_ID or user.rank_id == Constants.ADMIN_RANK_ID:
-                target = UserRepository.getByUsername(request['username'])
-                if target is None:
-                    return Utils.createWrongResponse(
-                        False,
-                        "target not found",
-                        404
-                    ), 404
-                else:
-                    if user.rank_id == Constants.ADMIN_RANK_ID:
-                        if target.user_id != user.user_id:
-                            if target.rank_id > Constants.ADMIN_RANK_ID:
+            user = UserRepository.getByUUID(uuid)
+            if user is None:
+                return Utils.createWrongResponse(
+                    False,
+                    "user not found",
+                    404
+                ), 404
+            else:
+                if user.rank_id == Constants.FOUNDER_RANK_ID or user.rank_id == Constants.ADMIN_RANK_ID:
+                    target = UserRepository.getByUsername(request['username'])
+                    if target is None:
+                        return Utils.createWrongResponse(
+                            False,
+                            "target not found",
+                            404
+                        ), 404
+                    else:
+                        if user.rank_id == Constants.ADMIN_RANK_ID:
+                            if target.user_id != user.user_id:
+                                if target.rank_id > Constants.ADMIN_RANK_ID:
+                                    UserRepository.editRank(target, RankService.getUpgradeRank(target))
+                                    return Utils.createSuccessResponse(
+                                        True,
+                                        RankRepository.getRankById(target.rank_id).name
+                                    )
+                                else:
+                                    return Utils.createWrongResponse(
+                                        False,
+                                        "you can't change this rank",
+                                        403
+                                    ), 403
+                            else:
+                                return Utils.createWrongResponse(
+                                    False,
+                                    "you can't change this rank",
+                                    403
+                                ), 403
+                        else:
+                            if target.rank_id > Constants.FOUNDER_RANK_ID:
                                 UserRepository.editRank(target, RankService.getUpgradeRank(target))
                                 return Utils.createSuccessResponse(
                                     True,
@@ -230,31 +270,12 @@ class UserService:
                                     "you can't change this rank",
                                     403
                                 ), 403
-                        else:
-                            return Utils.createWrongResponse(
-                                False,
-                                "you can't change this rank",
-                                403
-                            ), 403
-                    else:
-                        if target.rank_id > Constants.FOUNDER_RANK_ID:
-                            UserRepository.editRank(target, RankService.getUpgradeRank(target))
-                            return Utils.createSuccessResponse(
-                                True,
-                                RankRepository.getRankById(target.rank_id).name
-                            )
-                        else:
-                            return Utils.createWrongResponse(
-                                False,
-                                "you can't change this rank",
-                                403
-                            ), 403
-            else:
-                return Utils.createWrongResponse(
-                    False,
-                    "you can't change this rank",
-                    403
-                ), 403
+                else:
+                    return Utils.createWrongResponse(
+                        False,
+                        "you can't change this rank",
+                        403
+                    ), 403
 
     @classmethod
     def downgradeRank(cls, uuid, request):
@@ -265,58 +286,78 @@ class UserService:
                 Constants.INVALID_REQUEST,
                 400
             ), 400
-
-        user = UserRepository.getByUUID(uuid)
-        if user is None:
-            return Utils.createWrongResponse(
-                False,
-                Constants.NOT_FOUND,
-                404
-            ), 404
-        else:
-            if user.rank_id == Constants.FOUNDER_RANK_ID or user.rank_id == Constants.PEDINA_RANK_ID:
-                target = UserRepository.getByUsername(request['username'])
-                if target is None:
-                    return Utils.createWrongResponse(
-                        False,
-                        "you can't change this rank",
-                        404
-                    ), 404
-                else:
-                    if user.rank_id == Constants.ADMIN_RANK_ID:
-                        print(target.rank_id)
-                        if Constants.FOUNDER_RANK_ID < target.rank_id < Constants.PEDINA_RANK_ID:
-                            UserRepository.editRank(target, RankService.getDowngradeRank(target))
-                            return Utils.createSuccessResponse(
-                                True,
-                                RankRepository.getRankById(target.rank_id).name
-                            )
-                        else:
-                            return Utils.createWrongResponse(
-                                False,
-                                "you can't change this rank",
-                                403
-                            ), 403
-                    else:
-                        if Constants.FOUNDER_RANK_ID <= target.rank_id < Constants.PEDINA_RANK_ID:
-                            print(target.rank_id)
-                            UserRepository.editRank(target, RankService.getDowngradeRank(target))
-                            return Utils.createSuccessResponse(
-                                True,
-                                RankRepository.getRankById(target.rank_id).name
-                            )
-                        else:
-                            return Utils.createWrongResponse(
-                                False,
-                                "you can't change this rank",
-                                403
-                            ), 403
-            else:
+        if uuid == Constants.CONSOLE_UUID:
+            target = UserRepository.getByUsername(request['username'])
+            if target is None:
                 return Utils.createWrongResponse(
                     False,
-                    Constants.NOT_ENOUGH_PERMISSIONS,
+                    "target not found",
+                    404
+                ), 404
+            else:
+                if Constants.FOUNDER_RANK_ID <= target.rank_id < Constants.PEDINA_RANK_ID:
+                    target = UserRepository.editRank(target, RankService.getDowngradeRank(target))
+                    return Utils.createSuccessResponse(
+                        True,
+                        RankRepository.getRankById(target.rank_id).name
+                    )
+                return Utils.createWrongResponse(
+                    False,
+                    "you can't change this rank",
                     403
                 ), 403
+        else:
+            user = UserRepository.getByUUID(uuid)
+            if user is None:
+                return Utils.createWrongResponse(
+                    False,
+                    Constants.NOT_FOUND,
+                    404
+                ), 404
+            else:
+                if user.rank_id == Constants.FOUNDER_RANK_ID or user.rank_id == Constants.PEDINA_RANK_ID:
+                    target = UserRepository.getByUsername(request['username'])
+                    if target is None:
+                        return Utils.createWrongResponse(
+                            False,
+                            "you can't change this rank",
+                            404
+                        ), 404
+                    else:
+                        if user.rank_id == Constants.ADMIN_RANK_ID:
+                            print(target.rank_id)
+                            if Constants.FOUNDER_RANK_ID < target.rank_id < Constants.PEDINA_RANK_ID:
+                                UserRepository.editRank(target, RankService.getDowngradeRank(target))
+                                return Utils.createSuccessResponse(
+                                    True,
+                                    RankRepository.getRankById(target.rank_id).name
+                                )
+                            else:
+                                return Utils.createWrongResponse(
+                                    False,
+                                    "you can't change this rank",
+                                    403
+                                ), 403
+                        else:
+                            if Constants.FOUNDER_RANK_ID <= target.rank_id < Constants.PEDINA_RANK_ID:
+                                print(target.rank_id)
+                                UserRepository.editRank(target, RankService.getDowngradeRank(target))
+                                return Utils.createSuccessResponse(
+                                    True,
+                                    RankRepository.getRankById(target.rank_id).name
+                                )
+                            else:
+                                return Utils.createWrongResponse(
+                                    False,
+                                    "you can't change this rank",
+                                    403
+                                ), 403
+                else:
+                    return Utils.createWrongResponse(
+                        False,
+                        Constants.NOT_ENOUGH_PERMISSIONS,
+                        403
+                    ), 403
 
     @classmethod
     def generateTelegramCode(cls, uuid):
@@ -443,7 +484,7 @@ class UserService:
             return Utils.createWrongResponse(False, "not enough money", 403), 403
         UserRepository.useDiceWithMoney(request['final_space'], user)
         return Utils.createSuccessResponse(True, {
-            'money': Constants.MONEY_PER_TURN
+            'money': Utils.fixNumber(Constants.MONEY_PER_TURN)
         })
 
     @classmethod
@@ -463,23 +504,23 @@ class UserService:
             return Utils.createWrongResponse(False, "user not found", 404), 404
         UserRepository.addMoney(money, user)
         return Utils.createSuccessResponse(True, {
-            'amount': money
+            'amount':  Utils.fixNumber(money)
         })
 
     @classmethod
-    def prepareBank(cls, token, request):
+    def prepareBank(cls, token):
         user = UserRepository.getByUUID(token)
         if user is None:
             return Utils.createWrongResponse(False, "user not found", 404), 404
         targets = UserRepository.getUsersExclude(user.user_id)
         newTargets = []
         for target in targets:
-            if target.username not in request['online_players']:
+            if target.last_quit is not None:
                 newTargets.append(target)
         target = random.choice(newTargets)
         return Utils.createSuccessResponse(True, {
             'user': target.toJSON(),
-            'max_reward': cls.getMoneyPercentages(target.money)[0]
+            'max_reward':  Utils.fixNumber(cls.getMoneyPercentages(target.money)[0])
         })
 
     @classmethod
@@ -507,7 +548,7 @@ class UserService:
             return Utils.createWrongResponse(False, "user not found", 404), 404
         UserRepository.takeMoney(money, user)
         return Utils.createSuccessResponse(True, {
-            'amount': money
+            'amount':  Utils.fixNumber(money)
         })
 
     @classmethod
@@ -522,6 +563,33 @@ class UserService:
             target.user_id,
             Constants.NOTIFICATIONS['bank']
             .replace("{username}", user.username)
-            .replace("{money}", str(request['money']))
+            .replace("{money}", Utils.fixNumber(request['money']))
         )
-        return Utils.createSuccessResponse(True, "used")
+        return Utils.createSuccessResponse(True, {
+            'money': Utils.fixNumber(request['money'])
+        })
+
+    @classmethod
+    def setOnline(cls, token):
+        user: User = UserRepository.getByUUID(token)
+        if user is None:
+            return Utils.createWrongResponse(False, "user not found", 404), 404
+        if user.last_join.date() != datetime.datetime.now().date():
+            UserRepository.addMoney(Constants.DAILY_MONEY_BONUS, user)
+            UserRepository.setOnline(user)
+            return Utils.createSuccessResponse(True, {
+                'bonus': True,
+                'bonus_value': Constants.DAILY_MONEY_BONUS
+            })
+        UserRepository.setOnline(user)
+        return Utils.createSuccessResponse(True, {
+            'bonus': False
+        })
+
+    @classmethod
+    def setOffline(cls, token):
+        user = UserRepository.getByUUID(token)
+        if user is None:
+            return Utils.createWrongResponse(False, "user not found", 404), 404
+        UserRepository.setOffline(user)
+        return Utils.createSuccessResponse(True, 'set')

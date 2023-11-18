@@ -12,6 +12,7 @@ class RankService:
 
     @classmethod
     def getDowngradeRank(cls, user):
+        print(user.rank_id)
         return RankRepository.getRankById(user.rank_id + 1).rank_id
 
     @classmethod

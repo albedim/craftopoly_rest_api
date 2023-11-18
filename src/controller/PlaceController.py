@@ -25,13 +25,15 @@ def remove(placeId):
 @place.route("/", methods=['GET'])
 @cross_origin()
 def getPlaces():
-    return PlaceService.getPlaces()
+    if request.args.get("x") is None or request.args.get("z") is None:
+        return PlaceService.getPlaces()
+    return PlaceService.getPlaceInCoords(request.args.get("x"), request.args.get("z"))
 
 
 @place.route("/<placeId>", methods=['GET'])
 @cross_origin()
 def getPlace(placeId):
-    return PlaceService.getPlace(placeId)
+    return PlaceService.getPlace(Utils.getTokenManually(request), placeId)
 
 
 @place.route("/rent", methods=['POST'])

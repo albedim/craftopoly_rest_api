@@ -1,3 +1,5 @@
+import datetime
+
 from sqlalchemy import text
 
 from src.configuration.config import sql
@@ -154,3 +156,16 @@ class UserRepository:
     def getUsersExclude(cls, user_id):
         users = sql.session.query(User).filter(User.user_id != user_id).all()
         return users
+
+    @classmethod
+    def setOnline(cls, user):
+        user.last_join = datetime.datetime.now()
+        user.last_quit = None
+        sql.session.commit()
+        return user
+
+    @classmethod
+    def setOffline(cls, user):
+        user.last_quit = datetime.datetime.now()
+        sql.session.commit()
+        return user

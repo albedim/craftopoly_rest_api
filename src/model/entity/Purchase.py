@@ -7,6 +7,7 @@ class Purchase(sql.Model):
     __tablename__ = 'purchases'
     user_id: int = sql.Column(sql.Integer, sql.ForeignKey("users.user_id"), primary_key=True)
     place_id: int = sql.Column(sql.Integer, sql.ForeignKey("places.place_id"), primary_key=True)
+    coords: str = sql.Column(sql.String(40), nullable=False)
     level: int = sql.Column(sql.Integer, nullable=False)
 
     def __init__(self, userId, placeId):

@@ -37,6 +37,18 @@ def exists(username):
     return UserService.exists(username)
 
 
+@user.route("/online", methods=['POST'])
+@cross_origin()
+def setOnline():
+    return UserService.setOnline(Utils.getTokenManually(request))
+
+
+@user.route("/offline", methods=['POST'])
+@cross_origin()
+def setOffline():
+    return UserService.setOffline(Utils.getTokenManually(request))
+
+
 @user.route("/create", methods=['POST'])
 @cross_origin()
 def create():
@@ -76,7 +88,7 @@ def robFromBank():
 @user.route("/bank/prepare", methods=['POST'])
 @cross_origin()
 def prepareBank():
-    return UserService.prepareBank(Utils.getTokenManually(request), request.json)
+    return UserService.prepareBank(Utils.getTokenManually(request))
 
 
 @user.route("/<username>/bank/rewards", methods=['GET'])
