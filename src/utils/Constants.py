@@ -13,6 +13,7 @@ from datetime import datetime
 class Constants:
     DAILY_MONEY_BONUS = 5000
     MONEY_PER_TURN = 40
+    PLACES_R = 40
     PERCENTAGES = [20,17,14,10]
     USER_NOT_FOUND: str = "This user was not found"
     NOT_FOUND: str = "Not found"

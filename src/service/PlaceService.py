@@ -49,7 +49,7 @@ class PlaceService:
         user = UserRepository.getByUUID(token)
         if user is None:
             return Utils.createWrongResponse(False, "user not found", 404), 404
-        place = PlaceRepository.getPlace(request['place_id'])
+        place = PlaceRepository.getPlaceById(request['place_id'])
         if place is None:
             return Utils.createWrongResponse(False, "place not found", 404), 404
         purchase = PurchaseRepository.getPurchase(user.user_id, request['place_id'])
@@ -87,13 +87,12 @@ class PlaceService:
     @classmethod
     def getPlaceInCoords(cls, x, z):
         places = PlaceRepository.getPurchasedPlaces()
-        print(places)
         for place in places:
-            minX = int(place[1].split(",")[0]) - place[0].r
-            maxX = int(place[1].split(",")[0]) + place[0].r
+            minX = int(place[1].split(",")[0]) - Constants.PLACES_R
+            maxX = int(place[1].split(",")[0]) + Constants.PLACES_R
             y = int(place[1].split(",")[1])
-            minZ = int(place[1].split(",")[2]) - place[0].r
-            maxZ = int(place[1].split(",")[2]) + place[0].r
+            minZ = int(place[1].split(",")[2]) - Constants.PLACES_R
+            maxZ = int(place[1].split(",")[2]) + Constants.PLACES_R
             if float(x) > minX and float(x) < maxX and float(z) > minZ and float(z) < maxZ:
                 return Utils.createSuccessResponse(True, place[0].toJSON(owner=place[2].toJSON()))
         return Utils.createWrongResponse(False, "not found", 404), 404

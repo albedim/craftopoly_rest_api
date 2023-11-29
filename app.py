@@ -3,10 +3,11 @@ from flask_jwt_extended import JWTManager
 
 from src.configuration.config import app, sql
 from src.controller import UserController, RankController, TicketController, TicketMessageController, MuteController, \
-    BanController, NotificationController, PlaceController, PurchaseController
+    BanController, NotificationController, PlaceController, PurchaseController, BuildController
 
 # controllers init
 app.register_blueprint(TicketController.ticket)
+app.register_blueprint(BuildController.build)
 app.register_blueprint(PlaceController.place)
 app.register_blueprint(PurchaseController.purchase)
 app.register_blueprint(NotificationController.notification)

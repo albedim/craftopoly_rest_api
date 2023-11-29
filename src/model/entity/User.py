@@ -16,7 +16,6 @@ class User(sql.Model):
     telegram_code: str = sql.Column(sql.String(6), nullable=True)
     created_on: datetime.date = sql.Column(sql.Date, nullable=True)
     rank_id: int = sql.Column(sql.Integer, nullable=False)
-    dices: int = sql.Column(sql.Integer, nullable=False)
     final_space: int = sql.Column(sql.Integer, nullable=False)
     last_join: datetime.datetime = sql.Column(sql.DateTime, nullable=False)
     last_quit: datetime.datetime = sql.Column(sql.DateTime, nullable=True)
@@ -30,7 +29,6 @@ class User(sql.Model):
         self.final_space = 0
         self.level = 0
         self.last_join = datetime.datetime.now()
-        self.dices = Constants.DEFAULT_DICES
         self.money = Constants.DEFAULT_MONEY
         self.created_on = datetime.date.today()
 
@@ -43,7 +41,6 @@ class User(sql.Model):
             'final_space': self.final_space,
             'last_join': self.last_join,
             'last_quit': self.last_quit,
-            'dices': self.dices,
             'level': self.level,
             'created_on': str(self.created_on),
             'rank_id': self.rank_id

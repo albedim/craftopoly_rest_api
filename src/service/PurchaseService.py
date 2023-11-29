@@ -22,7 +22,7 @@ class PurchaseService:
         user = UserRepository.getByUUID(token)
         if user is None:
             return Utils.createWrongResponse(False, "user not found", 404), 404
-        place = PlaceRepository.getPlace(request['place_id'])
+        place = PlaceRepository.getPlaceById(request['place_id'])
         if place is None:
             return Utils.createWrongResponse(False, "place not found", 404), 404
         purchase = PurchaseRepository.getPurchase(user.user_id, request['place_id'])

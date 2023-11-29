@@ -7,7 +7,7 @@ class Notification(sql.Model):
     __tablename__ = 'notifications'
     notification_id: int = sql.Column(sql.Integer, primary_key=True)
     user_id: int = sql.Column(sql.Integer, nullable=False)
-    content: str = sql.Column(sql.String(50), nullable=False)
+    content: str = sql.Column(sql.String(84), nullable=False)
     created_on: int = sql.Column(sql.DateTime, nullable=False)
 
     def __init__(self, userId, content):

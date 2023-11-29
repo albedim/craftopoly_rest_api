@@ -49,3 +49,7 @@ class PlaceRepository:
             .filter(Purchase.place_id == placeId).first()
         return place
 
+    @classmethod
+    def getPlaceById(cls, placeId):
+        place = sql.session.query(Place).filter(Place.place_id == placeId).first()
+        return place

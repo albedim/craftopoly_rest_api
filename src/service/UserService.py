@@ -208,7 +208,7 @@ class UserService:
                     404
                 ), 404
             else:
-                if Constants.FOUNDER_RANK_ID < target.rank_id < Constants.PEDINA_RANK_ID:
+                if Constants.FOUNDER_RANK_ID < target.rank_id <= Constants.PEDINA_RANK_ID:
                     target = UserRepository.editRank(target, RankService.getUpgradeRank(target))
                     return Utils.createSuccessResponse(
                         True,
